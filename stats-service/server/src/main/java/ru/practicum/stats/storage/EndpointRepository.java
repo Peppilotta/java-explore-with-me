@@ -24,7 +24,7 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long>, JpaSp
             "and v.timestamp between :start and :end ")
     List<VisitorsStatsDto> getUniqueUrisFromList(LocalDateTime start, LocalDateTime end, List<String> uris);
 
-    @Query("select e.app as app, e.uri , count(v.ip) as hits " +
+    @Query("select e.app as app, e.uri as uri, count(v.ip) as hits " +
             "from Endpoint as e " +
             "inner join e.visitors v " +
             "where e.uri in :uris " +

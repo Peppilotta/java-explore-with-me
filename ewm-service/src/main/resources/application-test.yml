@@ -1,6 +1,6 @@
 spring:
   datasource:
     driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:db-evm
+    url: jdbc:h2:mem:evm
     username: admin
     password: admin
