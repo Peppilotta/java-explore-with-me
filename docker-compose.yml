@@ -33,7 +33,7 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
-      - stats-server
+      - server
     environment:
       - DB_NAME=ewm
       - POSTGRES_USER=root
