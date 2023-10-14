@@ -4,8 +4,8 @@ services:
     ports:
       - "9090:9090"
     build: stats-service/server
-    image: ewm-stats-service
-    container_name: stats-server
+    image: ewm-stats-service-image
+    container_name: ewm-stats-server
     depends_on:
       - stats-db
     environment:
@@ -29,8 +29,8 @@ services:
 
   ewm-service:
     build: ewm-service
-    image: ewm_main_service
-    container_name: ewm_main_service
+    image: ewm-main-service-image
+    container_name: ewm-main-service
     ports:
       - "8080:8080"
     depends_on:
