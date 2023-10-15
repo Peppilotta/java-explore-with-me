@@ -1,22 +1,20 @@
 package ru.practicum.stats;
 
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class BaseStatsClient {
-    protected final RestTemplate rest;
+    protected final RestTemplate restTemplate;
 
-    public BaseStatsClient(RestTemplate rest) {
-        this.rest = rest;
+    public BaseStatsClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     private static ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
@@ -35,7 +33,7 @@ public class BaseStatsClient {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, T body) {
+    protected <T> ResponseEntity<Object> post(String path, @Nullable T body) {
         return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 
@@ -43,25 +41,24 @@ public class BaseStatsClient {
                                                           String path,
                                                           @Nullable Map<String, Object> parameters,
                                                           @Nullable T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body);
 
-        ResponseEntity<Object> shareitServerResponse;
+        HttpEntity<T> requestEntity;
+
+        if (Objects.isNull(body)) {
+            requestEntity = (HttpEntity<T>) HttpEntity.EMPTY;
+        } else {
+            requestEntity = new HttpEntity<>(body);
+        }
+        ResponseEntity<Object> statsServerResponse;
         try {
             if (parameters != null) {
-                shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
+                statsServerResponse = restTemplate.exchange(path, method,requestEntity, Object.class,parameters);
             } else {
-                shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class);
+                statsServerResponse = restTemplate.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
-        return prepareGatewayResponse(shareitServerResponse);
-    }
-
-    private HttpHeaders defaultHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        return headers;
+        return prepareGatewayResponse(statsServerResponse);
     }
 }
