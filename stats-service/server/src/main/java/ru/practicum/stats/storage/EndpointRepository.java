@@ -28,25 +28,29 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long>, JpaSp
             "from Endpoint as e " +
             "inner join e.visitors v " +
             "where e.uri in :uris " +
-            "and v.timestamp between :start and :end ")
+            "and v.timestamp between :start and :end " +
+            "group by e.app, e.uri")
     List<VisitorsStatsDto> getUniqueUrisFromList(LocalDateTime start, LocalDateTime end, List<String> uris);
 
     @Query("select new ru.practicum.stats.VisitorsStatsDto(e.app, e.uri, count(v.ip)) " +
             "from Endpoint as e " +
             "inner join e.visitors v " +
             "where e.uri in :uris " +
-            "and v.timestamp between :start and :end ")
+            "and v.timestamp between :start and :end " +
+            "group by e.app, e.uri")
     List<VisitorsStatsDto> getUrisFromList(LocalDateTime start, LocalDateTime end, List<String> uris);
 
     @Query("select new ru.practicum.stats.VisitorsStatsDto(e.app, e.uri, count(v.ip)) " +
             "from Endpoint as e " +
             "inner join e.visitors v " +
-            "where v.timestamp between :start and :end ")
+            "where v.timestamp between :start and :end " +
+            "group by e.app, e.uri")
     List<VisitorsStatsDto> getAllUrisFromList(LocalDateTime start, LocalDateTime end);
 
     @Query("select new ru.practicum.stats.VisitorsStatsDto(e.app, e.uri, count(distinct v.ip)) " +
             "from Endpoint as e " +
             "inner join e.visitors v " +
-            "where v.timestamp between :start and :end ")
+            "where v.timestamp between :start and :end " +
+            "group by e.app, e.uri")
     List<VisitorsStatsDto> getAllUniqueUrisFromList(LocalDateTime start, LocalDateTime end);
 }

@@ -58,7 +58,7 @@ public class StatsService {
         LocalDateTime dateTimeStart = LocalDateTime.parse(start, formatter);
         LocalDateTime dateTimeEnd = LocalDateTime.parse(end, formatter);
         List<VisitorsStatsDto> stats = new ArrayList<>();
-        if (uris.isEmpty()) {
+        if (Objects.isNull(uris)) {
             stats.addAll((Objects.isNull(unique) || !unique)
                     ? endpointRepository.getAllUrisFromList(dateTimeStart, dateTimeEnd)
                     : endpointRepository.getAllUniqueUrisFromList(dateTimeStart, dateTimeEnd));
