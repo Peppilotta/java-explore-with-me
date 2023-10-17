@@ -1,13 +1,18 @@
 package ru.practicum.stats.dto;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.practicum.stats.model.Endpoint;
 import ru.practicum.stats.model.Visitor;
 
 @Component
 public class VisitorMapper {
+    private final EndpointMapper endpointMapper;
 
-    public VisitorDto toWithEndpoint(VisitorDtoWithoutEndpoint visitor, Long id) {
+    public VisitorMapper(EndpointMapper endpointMapper) {
+        this.endpointMapper = endpointMapper;
+    }
+
+    public VisitorDto toWithEndpoint(VisitorWithoutEndpoint visitor, Long id) {
         return VisitorDto.builder()
                 .endpointId(id)
                 .timestamp(visitor.getTimestamp())
@@ -15,9 +20,9 @@ public class VisitorMapper {
                 .build();
     }
 
-    public Visitor toVisitor(VisitorDtoWithoutEndpoint visitor, Endpoint endpoint) {
+    public Visitor toVisitor(VisitorWithoutEndpoint visitor, EndpointWithoutVisitors endpoint) {
         return Visitor.builder()
-                .endpoint(endpoint)
+                .endpoint(endpointMapper.fromWithoutVisitors(endpoint))
                 .timestamp(visitor.getTimestamp())
                 .ip(visitor.getIp())
                 .build();

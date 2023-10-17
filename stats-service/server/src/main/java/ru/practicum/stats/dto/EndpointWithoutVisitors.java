@@ -1,4 +1,4 @@
-package ru.practicum.stats;
+package ru.practicum.stats.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 @Getter
 @Setter
 @ToString
@@ -18,13 +15,11 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class VisitorsStatsDto {
+public class EndpointWithoutVisitors {
 
-    @NotBlank
+    private Long id;
+
     private String app;
 
-    @NotNull
     private String uri;
-
-    private Long hits;
 }

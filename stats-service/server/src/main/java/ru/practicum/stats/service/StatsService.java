@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.stats.EndpointHitDto;
 import ru.practicum.stats.VisitorsStatsDto;
 import ru.practicum.stats.dto.EndpointMapper;
-import ru.practicum.stats.dto.VisitorDtoWithoutEndpoint;
+import ru.practicum.stats.dto.EndpointWithoutVisitors;
+import ru.practicum.stats.dto.VisitorWithoutEndpoint;
 import ru.practicum.stats.dto.VisitorMapper;
 import ru.practicum.stats.model.Endpoint;
 import ru.practicum.stats.model.Visitor;
@@ -30,16 +31,27 @@ public class StatsService {
 
     public EndpointHitDto addHit(EndpointHitDto endpointHitDto) {
         String uri = endpointHitDto.getUri();
+        log.info("uri = {}", uri);
         String app = endpointHitDto.getApp();
-        Endpoint endpoint;
-        if (!endpointRepository.existsByUriAndApp(uri, app)) {
-            endpoint = endpointRepository.save(endpointMapper.toEndpoint(endpointHitDto));
+        log.info("app = {}", app);
+        EndpointWithoutVisitors endpoint;
+        boolean endpointExists = endpointRepository.existsByUriAndApp(uri, app);
+        log.info("endpointExists = {}", endpointExists);
+        if (endpointExists) {
+             endpoint = endpointRepository.findEndpointByUriAndApp(uri, app);
+            log.info("endpoint Exists = {}", endpoint.toString());
         } else {
-            endpoint = endpointRepository.getByUriAndApp(uri, app);
+            Endpoint fromHit = endpointMapper.toEndpoint(endpointHitDto);
+            log.info("fromHit = {}", fromHit.toString());
+            endpoint = endpointMapper.toWithoutVisitors(endpointRepository.save(fromHit));
+
+        log.info("endpoint = {}", endpoint);
+
         }
-        VisitorDtoWithoutEndpoint visitorDtoWithoutEndpoint = endpointMapper.toVisitor(endpointHitDto);
-        Visitor visitor = visitorRepository.save(visitorMapper.toVisitor(visitorDtoWithoutEndpoint, endpoint));
-        return endpointMapper.toEndpointHitDto(visitor);
+        VisitorWithoutEndpoint visitorWithoutEndpoint = endpointMapper.toVisitor(endpointHitDto);
+        Visitor visitor = visitorRepository.save(visitorMapper.toVisitor(visitorWithoutEndpoint, endpoint));
+        log.info("visitor = {}", visitor);
+        return endpointMapper.toEndpointHitDto(visitor, endpoint);
     }
 
     public List<VisitorsStatsDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
