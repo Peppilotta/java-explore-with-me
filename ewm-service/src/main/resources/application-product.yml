@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://evm-db:5431/evm
+    username: root
+    password: root

@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://stats-db:4321/stats
+    username: root
+    password: root
