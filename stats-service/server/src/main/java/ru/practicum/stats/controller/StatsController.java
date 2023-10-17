@@ -12,9 +12,7 @@ import ru.practicum.stats.EndpointHitDto;
 import ru.practicum.stats.VisitorsStatsDto;
 import ru.practicum.stats.service.StatsService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
