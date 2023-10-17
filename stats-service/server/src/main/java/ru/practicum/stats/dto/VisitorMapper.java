@@ -1,6 +1,5 @@
 package ru.practicum.stats.dto;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.stats.model.Visitor;
 

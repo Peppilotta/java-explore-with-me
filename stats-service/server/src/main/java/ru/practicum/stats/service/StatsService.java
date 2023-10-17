@@ -7,8 +7,8 @@ import ru.practicum.stats.EndpointHitDto;
 import ru.practicum.stats.VisitorsStatsDto;
 import ru.practicum.stats.dto.EndpointMapper;
 import ru.practicum.stats.dto.EndpointWithoutVisitors;
-import ru.practicum.stats.dto.VisitorWithoutEndpoint;
 import ru.practicum.stats.dto.VisitorMapper;
+import ru.practicum.stats.dto.VisitorWithoutEndpoint;
 import ru.practicum.stats.model.Endpoint;
 import ru.practicum.stats.model.Visitor;
 import ru.practicum.stats.storage.EndpointRepository;
@@ -38,15 +38,14 @@ public class StatsService {
         boolean endpointExists = endpointRepository.existsByUriAndApp(uri, app);
         log.info("endpointExists = {}", endpointExists);
         if (endpointExists) {
-             endpoint = endpointRepository.findEndpointByUriAndApp(uri, app);
+            endpoint = endpointRepository.findEndpointByUriAndApp(uri, app);
             log.info("endpoint Exists = {}", endpoint.toString());
         } else {
             Endpoint fromHit = endpointMapper.toEndpoint(endpointHitDto);
             log.info("fromHit = {}", fromHit.toString());
             endpoint = endpointMapper.toWithoutVisitors(endpointRepository.save(fromHit));
 
-        log.info("endpoint = {}", endpoint);
-
+            log.info("endpoint = {}", endpoint);
         }
         VisitorWithoutEndpoint visitorWithoutEndpoint = endpointMapper.toVisitor(endpointHitDto);
         Visitor visitor = visitorRepository.save(visitorMapper.toVisitor(visitorWithoutEndpoint, endpoint));

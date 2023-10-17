@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.stats.VisitorsStatsDto;
-import ru.practicum.stats.model.Endpoint;
 import ru.practicum.stats.dto.EndpointWithoutVisitors;
+import ru.practicum.stats.model.Endpoint;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
