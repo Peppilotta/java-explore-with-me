@@ -52,7 +52,7 @@ public class BaseStatsClient {
         ResponseEntity<Object> statsServerResponse;
         try {
             if (parameters != null) {
-                statsServerResponse = restTemplate.exchange(path, method,requestEntity, Object.class,parameters);
+                statsServerResponse = restTemplate.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
                 statsServerResponse = restTemplate.exchange(path, method, requestEntity, Object.class);
             }

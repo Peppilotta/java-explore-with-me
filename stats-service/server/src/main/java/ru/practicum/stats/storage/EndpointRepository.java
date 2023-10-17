@@ -16,8 +16,6 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long>, JpaSp
 
     boolean existsByUriAndApp(String uri, String app);
 
-    Endpoint findByUriAndApp(String uri, String app);
-
     @Query("select  new ru.practicum.stats.dto.EndpointWithoutVisitors(e.id, e.app, e.uri) " +
             "from Endpoint as e " +
             "where e.uri = :uri " +

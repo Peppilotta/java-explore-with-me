@@ -11,14 +11,6 @@ public class VisitorMapper {
         this.endpointMapper = endpointMapper;
     }
 
-    public VisitorDto toWithEndpoint(VisitorWithoutEndpoint visitor, Long id) {
-        return VisitorDto.builder()
-                .endpointId(id)
-                .timestamp(visitor.getTimestamp())
-                .ip(visitor.getIp())
-                .build();
-    }
-
     public Visitor toVisitor(VisitorWithoutEndpoint visitor, EndpointWithoutVisitors endpoint) {
         return Visitor.builder()
                 .endpoint(endpointMapper.fromWithoutVisitors(endpoint))
