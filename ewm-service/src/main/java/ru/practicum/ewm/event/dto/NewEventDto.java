@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.ewm.location.Location;
+import ru.practicum.ewm.location.dto.LocationDto;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
 import javax.validation.constraints.NotBlank;
@@ -48,7 +48,7 @@ public class NewEventDto {
     private UserShortDto initiator;
 
     @NotNull
-    private Location location;
+    private LocationDto location;
 
     private Boolean paid = false;
 

@@ -2,7 +2,7 @@ package ru.practicum.ewm.priv;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.request.ParticipationRequestDto;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
 import java.util.ArrayList;
 import java.util.List;

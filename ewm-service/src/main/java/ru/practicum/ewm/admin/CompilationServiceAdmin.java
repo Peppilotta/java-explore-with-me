@@ -1,7 +1,7 @@
 package ru.practicum.ewm.admin;
 
-import ru.practicum.ewm.compilation.CompilationDto;
-import ru.practicum.ewm.compilation.NewCompilationDto;
+import ru.practicum.ewm.compilation.dto.CompilationDto;
+import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 
 public interface CompilationServiceAdmin {
 

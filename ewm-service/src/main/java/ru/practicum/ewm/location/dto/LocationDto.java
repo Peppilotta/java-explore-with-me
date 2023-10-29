@@ -1,4 +1,4 @@
-package ru.practicum.ewm.category;
+package ru.practicum.ewm.location.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,10 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 @Getter
 @Setter
 @ToString
@@ -19,10 +15,11 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class NewCategoryDto {
+public class LocationDto {
 
-    @NotNull
-    @NotBlank
-    @Size(min = 1, max = 50)
-    private String name;
+    //Широта и долгота места проведения события
+
+    private Float lat;
+
+    private Float lon;
 }

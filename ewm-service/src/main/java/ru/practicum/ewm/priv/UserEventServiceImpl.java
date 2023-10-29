@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.request.EventRequestStatusUpdateRequest;
-import ru.practicum.ewm.request.EventRequestStatusUpdateResult;
-import ru.practicum.ewm.request.ParticipationRequestDto;
-import ru.practicum.ewm.request.UpdateEventUserRequest;
+import ru.practicum.ewm.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
+import ru.practicum.ewm.request.dto.UpdateEventUserRequest;
 
 import java.util.ArrayList;
 import java.util.List;

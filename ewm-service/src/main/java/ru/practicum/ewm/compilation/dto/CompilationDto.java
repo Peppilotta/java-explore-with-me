@@ -1,4 +1,4 @@
-package ru.practicum.ewm.request;
+package ru.practicum.ewm.compilation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,8 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Singular;
 import lombok.ToString;
+import ru.practicum.ewm.event.dto.EventShortDto;
 
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @Getter
@@ -19,13 +22,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class UpdateCompilationRequest {
+public class CompilationDto {
 
-    @Singular
-    private List<Long> events;
+    @NotNull
+    @Positive
+    private Long id;
 
     private Boolean pinned;
 
-    @Size(min = 1, max = 50)
+    @NotNull
+    @NotBlank
     private String title;
+
+    @Singular
+    private List<EventShortDto> events;
 }

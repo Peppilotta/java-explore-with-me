@@ -1,7 +1,7 @@
 package ru.practicum.ewm.admin;
 
-import ru.practicum.ewm.category.CategoryDto;
-import ru.practicum.ewm.category.NewCategoryDto;
+import ru.practicum.ewm.category.dto.CategoryDto;
+import ru.practicum.ewm.category.dto.NewCategoryDto;
 
 public interface CategoryServiceAdmin {
 

@@ -2,8 +2,8 @@ package ru.practicum.ewm.admin;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.compilation.CompilationDto;
-import ru.practicum.ewm.compilation.NewCompilationDto;
+import ru.practicum.ewm.compilation.dto.CompilationDto;
+import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 
 @Service
 @Slf4j

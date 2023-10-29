@@ -1,4 +1,4 @@
-package ru.practicum.ewm.request;
+package ru.practicum.ewm.request.dto;
 
 public enum RequestStatus {
     CONFIRMED("CONFIRMED"),

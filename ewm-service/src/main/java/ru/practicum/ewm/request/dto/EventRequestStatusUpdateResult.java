@@ -1,4 +1,4 @@
-package ru.practicum.ewm.request;
+package ru.practicum.ewm.request.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,9 +17,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class EventRequestStatusUpdateRequest {
+public class EventRequestStatusUpdateResult {
 
-    private List<Long> requestIds;
+    private List<ParticipationRequestDto> confirmedRequests;
 
-    private RequestStatus status;
+    private List<ParticipationRequestDto> rejectedRequests;
 }

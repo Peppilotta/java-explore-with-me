@@ -1,4 +1,4 @@
-package ru.practicum.ewm.category;
+package ru.practicum.ewm.location.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,25 +13,25 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "locations")
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Category {
+public class Location {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @Column(name = "location_id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @NotBlank
-    private String name;
+    @Column(name = "lat", nullable = false)
+    private Float lat;
+
+    @Column(name = "lon", nullable = false)
+    private Float lon;
 }

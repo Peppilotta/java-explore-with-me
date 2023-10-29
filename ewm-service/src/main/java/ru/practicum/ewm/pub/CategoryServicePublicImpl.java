@@ -2,7 +2,7 @@ package ru.practicum.ewm.pub;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.category.CategoryDto;
+import ru.practicum.ewm.category.dto.CategoryDto;
 
 import java.util.ArrayList;
 import java.util.List;

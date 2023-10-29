@@ -1,7 +1,7 @@
 package ru.practicum.ewm.pub;
 
 import org.springframework.data.domain.Pageable;
-import ru.practicum.ewm.compilation.CompilationDto;
+import ru.practicum.ewm.compilation.dto.CompilationDto;
 
 import java.util.List;
 

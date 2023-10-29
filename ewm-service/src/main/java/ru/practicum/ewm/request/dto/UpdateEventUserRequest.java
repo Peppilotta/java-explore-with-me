@@ -1,4 +1,4 @@
-package ru.practicum.ewm.request;
+package ru.practicum.ewm.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.ewm.event.dto.ReviewAction;
-import ru.practicum.ewm.location.Location;
+import ru.practicum.ewm.location.dto.LocationDto;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
 import javax.validation.constraints.Size;
@@ -40,7 +40,7 @@ public class UpdateEventUserRequest {
 
     private UserShortDto initiator;
 
-    private Location location;
+    private LocationDto location;
 
     private Boolean paid;
 

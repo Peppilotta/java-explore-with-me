@@ -1,8 +1,8 @@
 package ru.practicum.ewm.admin;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.category.CategoryDto;
-import ru.practicum.ewm.category.NewCategoryDto;
+import ru.practicum.ewm.category.dto.CategoryDto;
+import ru.practicum.ewm.category.dto.NewCategoryDto;
 
 @Service
 public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
