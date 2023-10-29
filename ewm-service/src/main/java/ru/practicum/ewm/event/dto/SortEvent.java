@@ -18,5 +18,4 @@ public enum SortEvent {
     public String toString() {
         return String.valueOf(value);
     }
-
 }

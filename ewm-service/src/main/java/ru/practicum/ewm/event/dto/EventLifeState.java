@@ -1,7 +1,5 @@
 package ru.practicum.ewm.event.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 public enum EventLifeState {
     PENDING("PENDING"),
     PUBLISHED("PUBLISHED"),

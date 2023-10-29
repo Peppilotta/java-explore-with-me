@@ -16,7 +16,6 @@ import ru.practicum.ewm.location.Location;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 @Getter

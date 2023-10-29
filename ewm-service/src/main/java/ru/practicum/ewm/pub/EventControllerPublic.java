@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,12 +28,12 @@ public class EventControllerPublic {
 
     @GetMapping
     public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
-                                         List<Long> categories,
-                                         Boolean paid,
-                                         String rangeStart,
-                                         String rangeEnd,
-                                         Boolean onlyAvailable,
-                                         String sort,
+                                         @RequestParam(required = false) List<Long> categories,
+                                         @RequestParam(required = false) Boolean paid,
+                                         @RequestParam(required = false) String rangeStart,
+                                         @RequestParam(required = false) String rangeEnd,
+                                         @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                         @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                          @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
@@ -40,7 +41,7 @@ public class EventControllerPublic {
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEvent(Long id) {
+    public EventFullDto getEvent(@PathVariable(name = "id") @Positive Long id) {
         return service.getEvent(id);
     }
 }

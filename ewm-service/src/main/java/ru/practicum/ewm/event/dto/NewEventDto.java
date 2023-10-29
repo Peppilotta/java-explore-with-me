@@ -11,12 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.ewm.category.CategoryDto;
 import ru.practicum.ewm.location.Location;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -63,5 +60,4 @@ public class NewEventDto {
     @NotBlank
     @Size(min = 3, max = 120)
     private String title;
-
 }

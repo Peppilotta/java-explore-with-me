@@ -25,19 +25,19 @@ public class RequestControllerPrivate {
     }
 
     @GetMapping
-    public List<ParticipationRequestDto> getRequests(@PathVariable("userId") @Positive Long userId) {
+    public List<ParticipationRequestDto> getRequests(@PathVariable(name = "userId") @Positive Long userId) {
         return service.getRequests(userId);
     }
 
     @PostMapping
-    public ParticipationRequestDto getRequest(@PathVariable("userId") @Positive Long userId,
+    public ParticipationRequestDto getRequest(@PathVariable(name = "userId") @Positive Long userId,
                                               @RequestParam @Positive Long eventId) {
         return service.getRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable("userId") @Positive Long userId,
-                                                 @PathVariable("requestId") @Positive Long requestId) {
+    public ParticipationRequestDto cancelRequest(@PathVariable(name = "userId") @Positive Long userId,
+                                                 @PathVariable(name = "requestId") @Positive Long requestId) {
         return service.cancelRequest(userId, requestId);
     }
 }

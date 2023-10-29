@@ -42,7 +42,7 @@ public class UserControllerAdmin {
     }
 
     @DeleteMapping("/{id}")
-    public UserDto deleteUser(@PathVariable @Positive long id) {
+    public UserDto deleteUser(@PathVariable(name = "id") @Positive long id) {
         return service.deleteUser(id);
     }
 }
