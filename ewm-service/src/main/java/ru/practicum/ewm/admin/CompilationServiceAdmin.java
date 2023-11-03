@@ -2,6 +2,7 @@ package ru.practicum.ewm.admin;
 
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.request.dto.UpdateCompilationRequest;
 
 public interface CompilationServiceAdmin {
 
@@ -9,5 +10,5 @@ public interface CompilationServiceAdmin {
 
     CompilationDto deleteCompilation(Long compId);
 
-    CompilationDto updateCompilation(Long compId, NewCompilationDto compilation);
+    CompilationDto updateCompilation(Long compId, UpdateCompilationRequest compilation);
 }

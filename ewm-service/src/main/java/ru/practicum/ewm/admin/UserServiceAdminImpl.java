@@ -26,7 +26,7 @@ public class UserServiceAdminImpl {
     // поправить
     public List<UserDto> getUsers(List<Long> ids, Pageable pageable) {
         log.info("GET request - all users");
-        return userRepository.findAll()
+        return userRepository.findAllByIds(ids, pageable)
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());

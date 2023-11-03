@@ -26,7 +26,7 @@ public class ApiError {
 
     private String reason;
 
-    private ErrorStatus status;
+    private String status;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

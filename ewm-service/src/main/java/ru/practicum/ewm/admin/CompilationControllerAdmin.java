@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.request.dto.UpdateCompilationRequest;
 
 import javax.validation.constraints.Positive;
 
@@ -36,7 +37,7 @@ public class CompilationControllerAdmin {
 
     @PatchMapping("/{compId}")
     public CompilationDto updateCompilation(@PathVariable(name = "compId") @Positive Long compId,
-                                            @RequestBody @Validated final NewCompilationDto compilation) {
+                                            @RequestBody @Validated final UpdateCompilationRequest compilation) {
         return service.updateCompilation(compId, compilation);
     }
 }

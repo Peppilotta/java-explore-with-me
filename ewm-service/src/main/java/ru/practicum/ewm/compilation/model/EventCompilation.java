@@ -1,4 +1,4 @@
-package ru.practicum.ewm.category.model;
+package ru.practicum.ewm.compilation.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,38 +6,32 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.ewm.event.model.Event;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "event_compilations")
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Category {
+public class EventCompilation {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @Column(name = "event_compilation_id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @NotBlank
-    private String name;
+    @Column(name = "compilation_id", nullable = false)
+    private Long compilationId;
 
-    @OneToMany(mappedBy = "category_id")
-    private List<Event> events;
+    @Column(name = "event_id", nullable = false)
+    private Long eventId;
 }

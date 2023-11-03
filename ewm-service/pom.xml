@@ -60,7 +60,18 @@
             <artifactId>client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-    </dependencies>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+
+     </dependencies>
 
 
     <build>
@@ -73,6 +84,29 @@
                     <layout>JAR</layout>
                 </configuration>
             </plugin>
+<!--
+            <plugin>
+                <groupId>org.hibernate.orm.tooling</groupId>
+                <artifactId>hibernate-enhance-maven-plugin</artifactId>
+&lt;!&ndash;
+     <version>6.1.7.Final</version>
+&ndash;&gt;
+                <executions>
+                    <execution>
+                        <configuration>
+                            <failOnError>true</failOnError>
+                            <enableLazyInitialization>true</enableLazyInitialization>
+                            <enableDirtyTracking>true</enableDirtyTracking>
+                            <enableAssociationManagement>true</enableAssociationManagement>
+                        </configuration>
+                        <goals>
+                            <goal>enhance</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+-->
+
         </plugins>
     </build>
 
