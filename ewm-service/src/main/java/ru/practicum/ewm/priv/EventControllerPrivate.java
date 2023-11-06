@@ -38,9 +38,13 @@ public class EventControllerPrivate {
     }
 
     @GetMapping
-    public List<EventShortDto> getEvents(@PathVariable(name = "userId") @Positive Long userId,
-                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
+    public List<EventShortDto> getEvents(
+            @PathVariable(name = "userId") @Positive(message = "Failed to convert value of type java.lang." +
+                    "String to required type int; " +
+                    "nested exception is java.lang.NumberFormatException: " +
+                    "For input string: ad") Long userId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.ASC, EVENT_ID_FIELD_NAME));
         return userEventService.getEvents(userId, pageable);

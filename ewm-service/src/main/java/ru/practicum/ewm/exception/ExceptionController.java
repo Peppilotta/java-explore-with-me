@@ -6,53 +6,34 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Map;
+import ru.practicum.ewm.error.ApiError;
 
 @RestControllerAdvice
 @Slf4j
 public class ExceptionController {
 
-    private static final String ERROR = "error";
-    private static final String MESSAGE = "message";
-
-    @ExceptionHandler(ItemDoesNotExistException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleWrongFilmId(final RuntimeException e) {
-        log.error(e.getMessage(), e);
-        return Map.of(ERROR, "wrong id",
-                MESSAGE, e.getMessage());
+    public ResponseEntity<ApiError> handleNotFound(final NotFoundException e) {
+        log.error(e.getApiError().getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(e.getApiError());
     }
 
-    @ExceptionHandler(FindDuplicateException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleConflict(final RuntimeException e) {
-        log.error(e.getMessage(), e);
-        return Map.of(ERROR, "conflict",
-                MESSAGE, e.getMessage());
-    }
-
-    @ExceptionHandler(NotOwnerException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Map<String, String> handleNotOwner(final RuntimeException e) {
-        log.error(e.getMessage(), e);
-        return Map.of(ERROR, "Forbidden",
-                MESSAGE, e.getMessage());
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(final BadRequestException e) {
-        log.warn(e.getMessage());
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequest(final BadRequestException e) {
+        log.warn(e.getApiError().getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(e.getMessage()));
+                .body(e.getApiError());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handleConflictException(final ConflictException e) {
-        log.warn(e.getMessage());
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflict(final ConflictException e) {
+        log.warn(e.getApiError().getMessage());
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(e.getMessage()));
+                .body(e.getApiError());
     }
 }

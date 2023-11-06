@@ -9,6 +9,7 @@ import lombok.ToString;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.event.dto.EventLifeState;
 import ru.practicum.ewm.location.model.Location;
+import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.Column;
@@ -21,8 +22,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -84,4 +87,7 @@ public class Event {
 
     @Column(name = "views")
     private Long views;
+
+    @OneToMany(mappedBy = "event_id")
+    private List<Request> eventRequests;
 }

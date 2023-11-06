@@ -11,12 +11,15 @@ import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.compilation.model.EventCompilation;
 import ru.practicum.ewm.compilation.storage.CompilationRepository;
 import ru.practicum.ewm.compilation.storage.EventCompilationRepository;
+import ru.practicum.ewm.error.ApiError;
+import ru.practicum.ewm.error.ErrorStatus;
 import ru.practicum.ewm.event.dto.EventMapper;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.storage.EventRepository;
-import ru.practicum.ewm.exception.ItemDoesNotExistException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.dto.UpdateCompilationRequest;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +52,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
     public CompilationDto deleteCompilation(Long compId) {
         log.info("Request for deleting Compilation with id = {}", compId);
         checkCompilationExists(compId);
-        Compilation compilation = compilationRepository.findById(compId).get();
+        Compilation compilation = compilationRepository.findById(compId).orElseGet(Compilation::new);
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
         List<EventShortDto> events = eventRepository.findAllByIds(eventIds)
                 .stream()
@@ -63,7 +66,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest compilationNew) {
         log.info("Request for updating Compilation with id = {} and Updates = {}", compId, compilationNew);
         checkCompilationExists(compId);
-        Compilation compilation = compilationRepository.findById(compId).get();
+        Compilation compilation = compilationRepository.findById(compId).orElseGet(Compilation::new);
         compilation.setTitle(compilationNew.getTitle());
         compilation.setPinned(compilationNew.getPinned());
         Compilation createdCompilation = compilationRepository.save(compilation);
@@ -81,25 +84,19 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
                     .map(e -> compilationMapper.toEventCompilation(new NewEventCompilationDto(id, e)))
                     .collect(Collectors.toList());
             eventCompilationRepository.saveAll(eventCompilations);
-            return eventRepository.findAllByIds(eventIds)
-                    .stream()
-                    .map(eventMapper::toShortDto)
-                    .collect(Collectors.toList());
+            return eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds));
         }
     }
 
     private void checkCompilationExists(Long compId) {
         if (!compilationRepository.existsById(compId)) {
-            String message = "Compilation with id=" + compId + " not exists";
-/*
             ApiError apiError = ApiError.builder()
-                    .message(message)
+                    .message("Compilation with id=" + compId + " not exists")
                     .reason("The required object was not found.")
                     .status(ErrorStatus.E_404_NOT_FOUND.getValue())
                     .timestamp(LocalDateTime.now())
                     .build();
-*/
-            throw new ItemDoesNotExistException(message);
+            throw new NotFoundException(apiError);
         }
     }
 }

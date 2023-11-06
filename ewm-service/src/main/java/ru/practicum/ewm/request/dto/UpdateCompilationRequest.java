@@ -26,6 +26,6 @@ public class UpdateCompilationRequest {
 
     private Boolean pinned;
 
-    @Size(min = 1, max = 50)
+    @Size(min = 1, max = 50, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String title;
 }

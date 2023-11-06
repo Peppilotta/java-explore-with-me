@@ -21,12 +21,12 @@ import javax.validation.constraints.Size;
 @Builder(toBuilder = true)
 public class NewUserRequest {
 
-    @NotNull
-    @Size(min = 2, max = 250)
+    @NotNull(message = "Field: name. Error: must not be blank. Value: null")
+    @Size(min = 2, max = 250, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String name;
 
-    @NotNull
+    @NotNull(message = "Field: email. Error: must not be blank. Value: null")
     @Email
-    @Size(min = 6, max = 254)
+    @Size(min = 6, max = 254, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String email;
 }

@@ -26,12 +26,12 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class UpdateEventUserRequest {
 
-    @Size(min = 20, max = 2000)
+    @Size(min = 20, max = 2000, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String annotation;
 
     private Long category;
 
-    @Size(min = 20, max = 7000)
+    @Size(min = 20, max = 7000, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String description;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -50,6 +50,6 @@ public class UpdateEventUserRequest {
 
     private ReviewAction stateAction;
 
-    @Size(min = 3, max = 120)
+    @Size(min = 3, max = 120, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String title;
 }

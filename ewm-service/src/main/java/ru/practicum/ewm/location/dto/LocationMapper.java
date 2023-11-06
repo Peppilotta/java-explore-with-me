@@ -12,4 +12,11 @@ public class LocationMapper {
                 .lon(location.getLon())
                 .build();
     }
+
+    public Location toLocation(LocationDto locationDto) {
+        return Location.builder()
+                .lat(locationDto.getLat())
+                .lon(locationDto.getLon())
+                .build();
+    }
 }

@@ -16,7 +16,7 @@ import ru.practicum.ewm.event.dto.EventMapper;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.storage.EventRepository;
-import ru.practicum.ewm.exception.ItemDoesNotExistException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,14 +47,15 @@ public class CompilationServiceImpl implements CompilationService {
 
     public CompilationDto getCompilation(Long compId) {
         checkCompilationExists(compId);
-        return compilationMapper.toCompilationDto(compilationRepository.findById(compId).get(), getEvents(compId));
+        return compilationMapper.toCompilationDto(
+                compilationRepository.findById(compId).orElseGet(Compilation::new), getEvents(compId));
     }
 
     private List<EventShortDto> getEvents(Long compId) {
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
         List<Event> events = eventRepository.findAllByIds(eventIds);
         return events.stream()
-                .map(event -> eventMapper.toShortDto(event))
+                .map(eventMapper::toShortDto)
                 .collect(Collectors.toList());
     }
 
@@ -67,9 +68,7 @@ public class CompilationServiceImpl implements CompilationService {
                     .status(ErrorStatus.E_404_NOT_FOUND.getValue())
                     .timestamp(LocalDateTime.now())
                     .build();
-
-            throw new ItemDoesNotExistException(message);
+            throw new NotFoundException(apiError);
         }
     }
-
 }

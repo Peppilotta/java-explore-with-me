@@ -6,15 +6,14 @@ import ru.practicum.ewm.error.ApiError;
 
 @Getter
 @Setter
-public class ConflictException extends RuntimeException {
+public class NotFoundException extends RuntimeException {
 
     private ApiError apiError;
 
-    public ConflictException(ApiError apiError) {
+    public NotFoundException(ApiError apiError) {
         this.apiError = apiError;
     }
-
-    public ConflictException(String message) {
+    public NotFoundException(String message) {
         super(message);
     }
 }

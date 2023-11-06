@@ -34,8 +34,9 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Field: name. Error: must not be blank. Value: null")
+    @NotBlank(message = "Field: name. Error: must not be blank. Value: blank")
+    @Column(name = "name", unique = true)
     private String name;
 
     @OneToMany(mappedBy = "category_id")

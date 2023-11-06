@@ -39,12 +39,4 @@ public class Compilation {
 
     @Column(name = "title", nullable = false)
     private String title;
-
-/*
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "event_compilations",
-            joinColumns = @JoinColumn(name = "event_compilation_id"),
-            inverseJoinColumns = @JoinColumn(name = "event_id"))
-    private List<Event> events;
-*/
 }

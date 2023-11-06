@@ -30,9 +30,9 @@ public class RequestControllerPrivate {
     }
 
     @PostMapping
-    public ParticipationRequestDto getRequest(@PathVariable(name = "userId") @Positive Long userId,
+    public ParticipationRequestDto addRequest(@PathVariable(name = "userId") @Positive Long userId,
                                               @RequestParam @Positive Long eventId) {
-        return service.getRequest(userId, eventId);
+        return service.addRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")

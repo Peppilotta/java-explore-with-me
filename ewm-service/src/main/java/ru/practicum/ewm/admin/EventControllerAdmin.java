@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.ewm.event.dto.EventFindParameters;
+import ru.practicum.ewm.event.dto.EventsFindParameters;
 import ru.practicum.ewm.event.dto.EventFullDto;
 
 import javax.validation.constraints.Positive;
@@ -29,7 +29,6 @@ public class EventControllerAdmin {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-
     private final EventServiceAdmin service;
 
     public EventControllerAdmin(EventServiceAdmin service) {
@@ -44,7 +43,7 @@ public class EventControllerAdmin {
                                         @RequestParam(required = false) String rangeEnd,
                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
-        EventFindParameters eventFindParameters = EventFindParameters.builder()
+        EventsFindParameters eventsFindParameters = EventsFindParameters.builder()
                 .users(Objects.isNull(users) ? new ArrayList<>() : users)
                 .states(Objects.isNull(states) ? new ArrayList<>() : states)
                 .categories(Objects.isNull(categories) ? new ArrayList<>() : categories)
@@ -53,7 +52,7 @@ public class EventControllerAdmin {
                 .build();
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.ASC, EVENT_ID_FIELD_NAME));
-        return service.getEvents(eventFindParameters, pageable);
+        return service.getEvents(eventsFindParameters, pageable);
     }
 
     @GetMapping("/{eventId}")

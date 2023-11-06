@@ -21,8 +21,8 @@ import javax.validation.constraints.Size;
 @Builder(toBuilder = true)
 public class NewCategoryDto {
 
-    @NotNull
-    @NotBlank
-    @Size(min = 1, max = 50)
+    @NotNull(message = "Field: name. Error: must not be blank. Value: null")
+    @NotBlank(message = "Field: name. Error: must not be blank. Value: blank")
+    @Size(min = 1, max = 50, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String name;
 }

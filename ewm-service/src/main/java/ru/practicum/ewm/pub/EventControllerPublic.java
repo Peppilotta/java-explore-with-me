@@ -10,15 +10,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.PublicEventFindParameters;
+import ru.practicum.ewm.event.dto.PublicEventsFindParameters;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/events")
 @Validated
 public class EventControllerPublic {
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EventServicePublic service;
 
@@ -35,13 +44,34 @@ public class EventControllerPublic {
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                         @RequestParam(defaultValue = "10") @Positive Integer size,
+                                         HttpServletRequest request) {
+
+        PublicEventsFindParameters eventFindParameters = PublicEventsFindParameters.builder()
+                .text(text)
+                .categories(Objects.isNull(categories) ? new ArrayList<>() : categories)
+                .paid(paid)
+                .rangeStart(Objects.isNull(rangeStart) ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, formatter))
+                .rangeEnd(Objects.isNull(rangeEnd) ? null : LocalDateTime.parse(rangeEnd, formatter))
+                .onlyAvailable(onlyAvailable)
+                .sort(sort)
+                .publicIp(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .build();
+
         Pageable pageable = PageRequest.of(from / size, size);
-        return service.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, pageable);
+
+        return service.getEvents(eventFindParameters, pageable);
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEvent(@PathVariable(name = "id") @Positive Long id) {
-        return service.getEvent(id);
+    public EventFullDto getEvent(@PathVariable(name = "id") @Positive Long id,
+                                 HttpServletRequest request) {
+        PublicEventFindParameters parameters = PublicEventFindParameters.builder()
+                .eventId(id)
+                .publicIp(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .build();
+        return service.getEvent(parameters);
     }
 }

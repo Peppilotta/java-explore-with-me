@@ -1,4 +1,4 @@
-package ru.practicum.stats;
+package ru.practicum.ewm.event.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,25 +8,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder(toBuilder = true)
-public class VisitorsStatsDto {
+public class PublicEventFindParameters {
 
-    @NotNull
-    @NotBlank
-    private String app;
+    private Long eventId;
 
-    @NotNull
-    @NotBlank
+    private String publicIp;
+
     private String uri;
 
-    private Long hits;
 }

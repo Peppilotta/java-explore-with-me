@@ -1,15 +1,18 @@
 package ru.practicum.ewm.user.dto;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.user.model.User;
+import ru.practicum.ewm.user.storage.UserRepository;
 
+@Component
+@RequiredArgsConstructor
 public class UserMapper {
 
-    public User toUser(UserDto userDto) {
-        return User.builder()
-                .id(userDto.getId())
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
+    private final UserRepository userRepository;
+
+    public User fromShort(UserShortDto userShort) {
+        return userRepository.findById(userShort.getId()).orElseGet(User::new);
     }
 
     public UserShortDto toUserShort(User user) {

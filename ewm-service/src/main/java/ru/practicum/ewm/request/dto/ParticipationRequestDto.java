@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 @Getter
@@ -23,10 +25,16 @@ import java.time.LocalDateTime;
 public class ParticipationRequestDto {
     //Заявка на участие в событии
 
+    @NotNull
+    @Positive
     private Long id;
 
+    @NotNull
+    @Positive
     private Long event;
 
+    @NotNull
+    @Positive
     private Long requester;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)

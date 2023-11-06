@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class EventFindParameters {
+public class EventsFindParameters {
 
     private List<Long> users;
 
