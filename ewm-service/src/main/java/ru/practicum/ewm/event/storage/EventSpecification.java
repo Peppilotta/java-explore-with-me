@@ -5,8 +5,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.model.Category_;
-import ru.practicum.ewm.event.dto.EventsFindParameters;
 import ru.practicum.ewm.event.dto.EventLifeState;
+import ru.practicum.ewm.event.dto.EventsFindParameters;
 import ru.practicum.ewm.event.dto.PublicEventsFindParameters;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.Event_;
@@ -64,8 +64,8 @@ public class EventSpecification {
             if (!Objects.isNull(findParameters.getRangeEnd())) {
                 predicates.add(criteriaBuilder.greaterThan(root.get(Event_.createdOn), findParameters.getRangeStart()));
             } else {
-                predicates.add(criteriaBuilder.between(root.get(Event_.createdOn)
-                        , findParameters.getRangeStart(), findParameters.getRangeEnd()));
+                predicates.add(criteriaBuilder.between(root.get(Event_.createdOn),
+                        findParameters.getRangeStart(), findParameters.getRangeEnd()));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
@@ -78,7 +78,7 @@ public class EventSpecification {
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
             predicates.add(criteriaBuilder.equal(root.get(Event_.state), EventLifeState.PUBLISHED));
             String text = findParameters.getText();
-            String pattern =  ("%" + text + "%").toLowerCase();
+            String pattern = ("%" + text + "%").toLowerCase();
             predicates.add(criteriaBuilder.or(criteriaBuilder.like(root.get(Event_.annotation), pattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
 
@@ -99,8 +99,8 @@ public class EventSpecification {
             if (!Objects.isNull(findParameters.getRangeEnd())) {
                 predicates.add(criteriaBuilder.greaterThan(root.get(Event_.createdOn), findParameters.getRangeStart()));
             } else {
-                predicates.add(criteriaBuilder.between(root.get(Event_.createdOn)
-                        , findParameters.getRangeStart(), findParameters.getRangeEnd()));
+                predicates.add(criteriaBuilder.between(root.get(Event_.createdOn),
+                        findParameters.getRangeStart(), findParameters.getRangeEnd()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

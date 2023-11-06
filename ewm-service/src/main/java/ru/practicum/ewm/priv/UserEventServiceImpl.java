@@ -177,8 +177,8 @@ public class UserEventServiceImpl implements UserEventService {
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId,
                                                               Long eventId,
                                                               EventRequestStatusUpdateRequest requestUpdates) {
-        log.info("Update request of participation from user with id={} for event with id={} and updates = {}"
-                , userId, eventId, requestUpdates);
+        log.info("Update request of participation from user with id={} for event with id={} and updates = {}",
+                userId, eventId, requestUpdates);
         List<Long> requestIds = requestUpdates.getRequestIds();
         if (Objects.isNull(requestIds)) {
             return new EventRequestStatusUpdateResult();

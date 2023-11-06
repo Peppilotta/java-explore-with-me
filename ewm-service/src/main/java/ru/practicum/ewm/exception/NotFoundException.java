@@ -13,6 +13,7 @@ public class NotFoundException extends RuntimeException {
     public NotFoundException(ApiError apiError) {
         this.apiError = apiError;
     }
+
     public NotFoundException(String message) {
         super(message);
     }
