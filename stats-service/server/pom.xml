@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ru.practicum.stats</groupId>
+    <groupId>ru.practicum</groupId>
     <artifactId>server</artifactId>
 
     <packaging>jar</packaging>
@@ -40,7 +40,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>ru.practicum.stats</groupId>
+            <groupId>ru.practicum</groupId>
             <artifactId>dto</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
@@ -60,7 +60,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>ru.practicum.stats.ServerApp</mainClass>
+                    <mainClass>ru.practicum.ServerApp</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>

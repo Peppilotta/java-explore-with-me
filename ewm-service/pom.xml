@@ -98,7 +98,7 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.practicum.stats</groupId>
+            <groupId>ru.practicum</groupId>
             <artifactId>client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -138,7 +138,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>ru.practicum.ewm.EwmApp</mainClass>
+                    <mainClass>ru.practicum.EwmApp</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>
