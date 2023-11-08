@@ -39,6 +39,6 @@ public class Category {
     @Column(name = "name", unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "category_id")
+    @OneToMany(mappedBy = "category")
     private List<Event> events;
 }

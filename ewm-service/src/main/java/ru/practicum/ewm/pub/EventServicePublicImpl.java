@@ -35,7 +35,8 @@ public class EventServicePublicImpl implements EventServicePublic {
     private final EventSpecification eventSpecification;
     private final RequestRepository requestRepository;
     private final EventMapper eventMapper;
-    private final StatsClient client;
+
+       private final StatsClient client;
 
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
         saveStatistic(parameters.getPublicIp(), parameters.getUri());

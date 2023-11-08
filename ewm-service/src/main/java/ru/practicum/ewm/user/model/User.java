@@ -29,7 +29,7 @@ public class User {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "email", nullable = false, length = 512, unique = true)
+    @Column(name = "email",nullable = false, length = 512, unique = true)
     private String email;
 
     @Column(name = "name", nullable = false)

@@ -20,7 +20,7 @@ import java.util.List;
 @Validated
 public class CategoriesControllerPublic {
 
-    private static final String CATEGORY_ID_FIELD_NAME = "id";
+    private static final String CATEGORY_ID_FIELD_NAME = "cat_id";
 
     private final CategoryServicePublic service;
 

@@ -1,5 +1,27 @@
 version: '3.1'
 services:
+  ewm-db:
+    image: postgres:14-alpine
+    container_name: ewm-db
+    ports:
+      - "6543:5432"
+    environment:
+      - POSTGRES_DB=ewm
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    command: -p 5432
+
+  stats-db:
+    image: postgres:14-alpine
+    container_name: stats-db
+    ports:
+      - "6542:4321"
+    environment:
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    command: -p 4321
+
   stats-server:
     ports:
       - "9090:9090"
@@ -14,16 +36,6 @@ services:
       - DB_HOST=stats-db
       - DB_PORT=4321
 
-  stats-db:
-    image: postgres:14-alpine
-    container_name: external-stats-db
-    ports:
-      - "6542:4321"
-    environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-    command: -p 4321
 
   ewm-service:
     build: ewm-service
@@ -38,16 +50,6 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
       - DB_HOST=ewm-db
-      - DB_PORT=5431
+      - DB_PORT=5432
       - STATS_SERVER_URL=http://stats-server:9090
 
-  ewm-db:
-    image: postgres:14-alpine
-    container_name: external-ewm-db
-    ports:
-      - "6543:5431"
-    environment:
-      - POSTGRES_DB=ewm
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-    command: -p 5431

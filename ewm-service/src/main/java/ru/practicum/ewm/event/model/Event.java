@@ -43,7 +43,11 @@ public class Event {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "initiator_id")
+    private User initiator;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cat_id")
     private Category category;
 
     @Column(name = "annotation", length = 2000, nullable = false)
@@ -57,10 +61,6 @@ public class Event {
 
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id")
-    private User initiator;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
@@ -88,6 +88,6 @@ public class Event {
     @Column(name = "views")
     private Long views;
 
-    @OneToMany(mappedBy = "event_id")
+    @OneToMany(mappedBy = "event")
     private List<Request> eventRequests;
 }

@@ -2,6 +2,7 @@ package ru.practicum.ewm.admin;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +34,7 @@ public class CategoriesControllerAdmin {
         return categoryServiceAdmin.deleteCategory(catId);
     }
 
-    @DeleteMapping("/{catId}")
+    @PatchMapping("/{catId}")
     public CategoryDto deleteCategory(@PathVariable("catId") @Positive long catId,
                                       @RequestBody NewCategoryDto category) {
         return categoryServiceAdmin.editCategory(catId, category);
