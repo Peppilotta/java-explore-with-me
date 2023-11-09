@@ -13,6 +13,7 @@ import ru.practicum.user.dto.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.storage.UserRepository;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +29,9 @@ public class UserServiceAdminImpl {
 
     // поправить
     public List<UserDto> getUsers(List<Long> ids, Pageable pageable) {
-        log.info("GET request - all users");
+        for (Long id : ids) {
+            log.info("id={}", id);
+        }
         return userRepository.findAllByIds(ids, pageable)
                 .stream()
                 .map(userMapper::toDto)

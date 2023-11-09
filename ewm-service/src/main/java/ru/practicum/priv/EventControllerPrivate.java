@@ -20,6 +20,7 @@ import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.dto.UpdateEventUserRequest;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -52,7 +53,7 @@ public class EventControllerPrivate {
 
     @PostMapping
     public EventFullDto addEvent(@PathVariable(name = "userId") @Positive Long userId,
-                                 @RequestBody @Validated final NewEventDto event) {
+                                 @RequestBody @Valid final NewEventDto event) {
         return userEventService.addEvent(userId, event);
     }
 
@@ -65,7 +66,7 @@ public class EventControllerPrivate {
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable(name = "userId") @Positive Long userId,
                                     @PathVariable(name = "eventId") @Positive Long eventId,
-                                    @RequestBody @Validated final UpdateEventUserRequest event) {
+                                    @RequestBody @Valid final UpdateEventUserRequest event) {
         return userEventService.updateEvent(userId, eventId, event);
     }
 
@@ -80,7 +81,7 @@ public class EventControllerPrivate {
     public EventRequestStatusUpdateResult updateRequestStatus(
             @PathVariable(name = "userId") @Positive Long userId,
             @PathVariable(name = "eventId") @Positive Long eventId,
-            @RequestBody @Validated final EventRequestStatusUpdateRequest request) {
+            @RequestBody @Valid final EventRequestStatusUpdateRequest request) {
         return userEventService.updateRequestStatus(userId, eventId, request);
     }
 }

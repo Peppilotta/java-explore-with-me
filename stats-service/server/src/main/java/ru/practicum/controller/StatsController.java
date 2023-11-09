@@ -12,6 +12,7 @@ import ru.practicum.EndpointHitDto;
 import ru.practicum.VisitorsStatsDto;
 import ru.practicum.service.StatsService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,7 +24,7 @@ public class StatsController {
     private final StatsService statsService;
 
     @PostMapping("/hit")
-    public EndpointHitDto addHit(@RequestBody EndpointHitDto endpointHitDto) {
+    public EndpointHitDto addHit(@RequestBody @Valid final EndpointHitDto endpointHitDto) {
         return statsService.addHit(endpointHitDto);
     }
 

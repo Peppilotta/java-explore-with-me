@@ -3,4 +3,4 @@ spring:
     group:
       local: common, test
       production: common, product
-    default: production
+    default: local

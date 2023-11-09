@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
 @RestController
@@ -25,7 +26,7 @@ public class CategoriesControllerAdmin {
     }
 
     @PostMapping
-    public CategoryDto addCategory(@RequestBody NewCategoryDto category) {
+    public CategoryDto addCategory(@RequestBody @Valid final NewCategoryDto category) {
         return categoryServiceAdmin.addCategory(category);
     }
 
@@ -36,7 +37,7 @@ public class CategoriesControllerAdmin {
 
     @PatchMapping("/{catId}")
     public CategoryDto deleteCategory(@PathVariable("catId") @Positive long catId,
-                                      @RequestBody NewCategoryDto category) {
+                                      @RequestBody @Valid final NewCategoryDto category) {
         return categoryServiceAdmin.editCategory(catId, category);
     }
 }
