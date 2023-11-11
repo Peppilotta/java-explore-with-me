@@ -13,7 +13,6 @@ import ru.practicum.user.dto.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.storage.UserRepository;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;

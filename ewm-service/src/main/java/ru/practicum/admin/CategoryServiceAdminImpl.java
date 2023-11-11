@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.dto.NewCategoryDto;
+import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.storage.EventRepository;
-import ru.practicum.category.dto.CategoryMapper;
-import ru.practicum.category.model.Category;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
