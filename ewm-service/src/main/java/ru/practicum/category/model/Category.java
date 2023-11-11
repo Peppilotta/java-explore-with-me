@@ -30,7 +30,7 @@ import java.util.List;
 public class Category {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @Column(name = "cat_id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
