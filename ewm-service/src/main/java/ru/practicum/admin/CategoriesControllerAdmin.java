@@ -47,6 +47,7 @@ public class CategoriesControllerAdmin {
     public CategoryDto getCategory(@PathVariable("catId") @Positive long catId) {
         return categoryServiceAdmin.getCategory(catId);
     }
+
     @GetMapping
     public List<CategoryDto> getCategories() {
         return categoryServiceAdmin.getCategories();
