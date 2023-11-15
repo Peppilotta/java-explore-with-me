@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
@@ -11,11 +12,15 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventLifeState;
 import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.ReviewAction;
+import ru.practicum.event.dto.StateAction;
+import ru.practicum.event.dto.UpdateEventDtoByAdmin;
+import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
-import ru.practicum.category.model.Category;
+import ru.practicum.event.storage.EventSpecification;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
@@ -28,7 +33,6 @@ import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.dto.RequestMapper;
 import ru.practicum.request.dto.RequestStatus;
-import ru.practicum.request.dto.UpdateEventUserRequest;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.storage.RequestRepository;
 import ru.practicum.user.dto.UserMapper;
@@ -44,7 +48,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserEventServiceImpl implements UserEventService {
+public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
 
@@ -55,6 +59,8 @@ public class UserEventServiceImpl implements UserEventService {
     private final CategoryRepository categoryRepository;
 
     private final RequestRepository requestRepository;
+
+    private final EventSpecification eventSpecification;
 
     private final RequestMapper requestMapper;
 
@@ -78,7 +84,7 @@ public class UserEventServiceImpl implements UserEventService {
             .timestamp(LocalDateTime.now())
             .build();
 
-    ApiError apiErrorBadRequest = ApiError.builder()
+    private final ApiError apiErrorBadRequest = ApiError.builder()
             .message("")
             .reason("Incorrectly made request.")
             .status(ErrorStatus.E_400_BAD_REQUEST.getValue())
@@ -98,10 +104,15 @@ public class UserEventServiceImpl implements UserEventService {
         log.info("Create request  of user with id={} for event = {}", userId, event);
         checkEventTime(event.getEventDate());
         checkUserExistence(userId);
-        checkUserEvent(userId, event.getInitiator().getId());
+        if (Objects.isNull(event.getInitiator())) {
+            event.setInitiator(userRepository.findByIdToShort(userId));
+        } else {
+            checkUserEvent(userId, event.getInitiator().getId());
+        }
         Long categoryId = event.getCategory();
         checkCategoryExistence(categoryId);
         Category category = categoryRepository.findById(categoryId).orElseGet(Category::new);
+        event.setCreatedOn(LocalDateTime.now());
 
         return eventMapper.toFullDto(eventRepository.save(eventMapper.toEventFromNew(event,
                 saveTestedLocation(event.getLocation()),
@@ -220,6 +231,41 @@ public class UserEventServiceImpl implements UserEventService {
                 requestMapper.toDtos(rejectedRequests));
     }
 
+    public List<EventFullDto> getEventsByAdmin(EventsFindParameters parameters, Pageable pageable) {
+        log.info("Request for list Events according parameters {}", parameters);
+        return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
+                .stream()
+                .map(eventMapper::toFullDto)
+                .collect(Collectors.toList());
+    }
+
+    public EventFullDto getEventByAdmin(Long eventId) {
+        checkEventExistence(eventId);
+        return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
+    }
+
+    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventDtoByAdmin newEvent) {
+        checkEventExistence(eventId);
+        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        event.setAnnotation(newEvent.getAnnotation());
+        Long categoryId = newEvent.getCategory();
+        checkCategoryExistence(categoryId);
+        event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
+        event.setDescription(newEvent.getDescription());
+        event.setEventDate(newEvent.getEventDate());
+        LocationDto locationDto = newEvent.getLocation();
+        event.setLocation(saveTestedLocation(locationDto));
+        event.setPaid(newEvent.getPaid());
+        event.setParticipantLimit(newEvent.getParticipantLimit());
+        event.setRequestModeration(newEvent.getRequestModeration());
+        event.setState(Objects.equals(newEvent.getStateAction(), StateAction.PUBLISH_EVENT)
+                ? EventLifeState.PUBLISHED
+                : EventLifeState.CANCELED);
+        event.setTitle(newEvent.getTitle());
+
+        return eventMapper.toFullDto(eventRepository.save(event));
+    }
+
     private void checkEventTime(LocalDateTime eventDate) {
         if (LocalDateTime.now().plusHours(2).isAfter(eventDate)) {
             apiError.setMessage("Field: eventDate. Error: Time must be in the future. Value:" + eventDate);
@@ -279,9 +325,14 @@ public class UserEventServiceImpl implements UserEventService {
         Float lat = locationDto.getLat();
         Float lon = locationDto.getLon();
         if (locationRepository.existsByLatAndLon(lat, lon)) {
-            return locationRepository.save(locationMapper.toLocation(locationDto));
-        } else {
+            log.info("Location exists");
             return locationRepository.findByLatAndLon(lat, lon);
+        } else {
+            log.info("Location not exists");
+
+            Location location = locationRepository.save(locationMapper.toLocation(locationDto));
+            log.info("Location not exists, new location={}", location);
+            return location;
         }
     }
 }

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.location.dto.LocationDto;
-import ru.practicum.user.dto.UserShortDto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -25,7 +24,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class NewEventDto {
+public class UpdateEventDtoByAdmin {
 
     @NotNull(message = "Field: annotation. Error: must not be blank. Value: null")
     @NotBlank(message = "Field: annotation. Error: must not be blank. Value: blank")
@@ -44,12 +43,6 @@ public class NewEventDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdOn;
-
-    private UserShortDto initiator;
-
     @NotNull(message = "Field: location. Error: must not be blank. Value: null")
     private LocationDto location;
 
@@ -58,6 +51,8 @@ public class NewEventDto {
     private Integer participantLimit = 0;
 
     private Boolean requestModeration = true;
+
+    private StateAction stateAction;
 
     @NotNull(message = "Field: title. Error: must not be blank. Value: null")
     @NotBlank(message = "Field: title. Error: must not be blank. Value: blank")

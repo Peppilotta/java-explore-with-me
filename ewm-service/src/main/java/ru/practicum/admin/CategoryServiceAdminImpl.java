@@ -15,6 +15,7 @@ import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -49,6 +50,19 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
         categoryRepository.deleteById(catId);
         log.info("Category deleted. {}", deletedCategory);
         return categoryMapper.toDto(deletedCategory);
+    }
+
+    public CategoryDto getCategory(Long catId) {
+        log.info("Request for get Category with id = {}", catId);
+        checkCategoryExists(catId);
+        checkEventsOfCategoryExists(catId);
+        Category category = categoryRepository.findById(catId).orElseGet(Category::new);
+        return categoryMapper.toDto(category);
+    }
+
+    public List<CategoryDto> getCategories() {
+        log.info("Request for all categories");
+        return categoryMapper.toDtos(categoryRepository.findAllOrderById());
     }
 
     private void checkCategoryExists(Long catId) {

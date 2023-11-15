@@ -5,13 +5,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventsFindParameters;
+import ru.practicum.event.dto.UpdateEventDtoByAdmin;
+import ru.practicum.priv.EventService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -29,9 +34,9 @@ public class EventControllerAdmin {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final EventServiceAdmin service;
+    private final EventService service;
 
-    public EventControllerAdmin(EventServiceAdmin service) {
+    public EventControllerAdmin(EventService service) {
         this.service = service;
     }
 
@@ -52,11 +57,17 @@ public class EventControllerAdmin {
                 .build();
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.ASC, EVENT_ID_FIELD_NAME));
-        return service.getEvents(eventsFindParameters, pageable);
+        return service.getEventsByAdmin(eventsFindParameters, pageable);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(@PathVariable("eventId") @Positive Long eventId) {
-        return service.getEvent(eventId);
+        return service.getEventByAdmin(eventId);
+    }
+
+    @PatchMapping("/{eventId}")
+    public EventFullDto patchEvent(@PathVariable("eventId") @Positive Long eventId,
+                                   @RequestBody @Valid final UpdateEventDtoByAdmin event) {
+        return service.patchEventByAdmin(eventId, event);
     }
 }

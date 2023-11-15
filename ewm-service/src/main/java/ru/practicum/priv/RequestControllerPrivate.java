@@ -31,7 +31,7 @@ public class RequestControllerPrivate {
 
     @PostMapping
     public ParticipationRequestDto addRequest(@PathVariable(name = "userId") @Positive Long userId,
-                                              @RequestParam @Positive Long eventId) {
+                                              @RequestParam(name = "eventId") @Positive Long eventId) {
         return service.addRequest(userId, eventId);
     }
 

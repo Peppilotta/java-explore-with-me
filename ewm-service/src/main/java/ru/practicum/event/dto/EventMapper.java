@@ -27,16 +27,19 @@ public class EventMapper {
     private final LocationMapper locationMapper;
 
     public Event toEventFromNew(NewEventDto newEvent, Location location, Category category) {
+        boolean requestModeration = newEvent.getRequestModeration();
         return Event.builder()
                 .annotation(newEvent.getAnnotation())
                 .category(category)
                 .description(newEvent.getDescription())
                 .eventDate(newEvent.getEventDate())
                 .initiator(userMapper.fromShort(newEvent.getInitiator()))
+                .createdOn(newEvent.getCreatedOn())
                 .location(location)
+                .state(EventLifeState.PENDING)
                 .paid(newEvent.getPaid())
                 .participantLimit(newEvent.getParticipantLimit())
-                .requestModeration(newEvent.getRequestModeration())
+                .requestModeration(requestModeration)
                 .title(newEvent.getTitle())
                 .build();
     }
@@ -51,6 +54,10 @@ public class EventMapper {
                 .category(categoryMapper.toDto(event.getCategory()))
                 .confirmedRequests(confirmedRequests)
                 .eventDate(event.getEventDate())
+                .paid(event.getPaid())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .location(locationMapper.toDto(event.getLocation()))
                 .initiator(userMapper.toUserShort(event.getInitiator()))
                 .build();
     }

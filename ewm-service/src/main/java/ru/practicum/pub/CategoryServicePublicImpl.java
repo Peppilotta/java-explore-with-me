@@ -26,7 +26,7 @@ public class CategoryServicePublicImpl implements CategoryServicePublic {
     private final CategoryMapper categoryMapper;
 
     public List<CategoryDto> getCategories(Pageable pageable) {
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findAllOrderById().stream()
                 .map(categoryMapper::toDto)
                 .collect(Collectors.toList());
     }

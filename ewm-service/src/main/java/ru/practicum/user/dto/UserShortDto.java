@@ -21,11 +21,12 @@ import javax.validation.constraints.Positive;
 @Builder(toBuilder = true)
 public class UserShortDto {
 
-    @NotNull
-    @NotBlank
-    String name;
 
     @NotNull
     @Positive
     private Long id;
+
+    @NotNull
+    @NotBlank
+    private String name;
 }

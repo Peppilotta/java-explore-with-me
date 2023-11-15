@@ -1,6 +1,7 @@
 package ru.practicum.event.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.practicum.category.model.Category_;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class EventSpecification {
 
@@ -41,6 +43,7 @@ public class EventSpecification {
                         .where(userRoot.get(User_.id).in(users));
 
                 predicates.add(criteriaBuilder.in(root.get(Event_.initiator)).value(userSubQuery));
+                log.info("Users criteria added");
             }
             List<Long> categories = findParameters.getCategories();
             if (!categories.isEmpty()) {
@@ -50,6 +53,8 @@ public class EventSpecification {
                         .distinct(true)
                         .where(categoryRoot.get(Category_.id).in(categories));
                 predicates.add(criteriaBuilder.in(root.get(Event_.category)).value(categorySubQuery));
+                log.info("Categories criteria added");
+
             }
             List<String> states = findParameters.getStates();
             if (!states.isEmpty()) {
@@ -59,13 +64,17 @@ public class EventSpecification {
                     inStates.value(eventLifeState);
                 }
                 predicates.add(inStates);
+                log.info("States criteria added");
+
             }
 
             if (!Objects.isNull(findParameters.getRangeEnd())) {
                 predicates.add(criteriaBuilder.greaterThan(root.get(Event_.createdOn), findParameters.getRangeStart()));
+                log.info("Time criteria added");
             } else {
                 predicates.add(criteriaBuilder.between(root.get(Event_.createdOn),
                         findParameters.getRangeStart(), findParameters.getRangeEnd()));
+                log.info("Time criteria added");
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
