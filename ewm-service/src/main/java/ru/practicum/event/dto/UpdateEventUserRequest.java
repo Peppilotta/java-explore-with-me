@@ -13,7 +13,6 @@ import lombok.ToString;
 import ru.practicum.location.dto.LocationDto;
 import ru.practicum.user.dto.UserShortDto;
 
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Getter
@@ -25,12 +24,12 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class UpdateEventUserRequest {
 
-    @Size(min = 20, max = 2000, message = "Size of '${validatedValue}' must be between {min) and {max}")
+    //   @Size(min = 20, max = 2000, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String annotation;
 
     private Long category;
 
-    @Size(min = 20, max = 7000, message = "Size of '${validatedValue}' must be between {min) and {max}")
+    //    @Size(min = 20, max = 7000, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String description;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -49,6 +48,6 @@ public class UpdateEventUserRequest {
 
     private ReviewAction stateAction;
 
-    @Size(min = 3, max = 120, message = "Size of '${validatedValue}' must be between {min) and {max}")
+    //    @Size(min = 3, max = 120, message = "Size of '${validatedValue}' must be between {min) and {max}")
     private String title;
 }

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventsFindParameters;
-import ru.practicum.event.dto.UpdateEventDtoByAdmin;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.priv.EventService;
 
 import javax.validation.Valid;
@@ -67,7 +67,7 @@ public class EventControllerAdmin {
 
     @PatchMapping("/{eventId}")
     public EventFullDto patchEvent(@PathVariable("eventId") @Positive Long eventId,
-                                   @RequestBody @Valid final UpdateEventDtoByAdmin event) {
+                                   @RequestBody @Valid final UpdateEventAdminRequest event) {
         return service.patchEventByAdmin(eventId, event);
     }
 }

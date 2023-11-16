@@ -16,7 +16,7 @@ import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.ReviewAction;
 import ru.practicum.event.dto.StateAction;
-import ru.practicum.event.dto.UpdateEventDtoByAdmin;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
@@ -244,24 +244,61 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
     }
 
-    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventDtoByAdmin newEvent) {
+    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest newEvent) {
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        event.setAnnotation(newEvent.getAnnotation());
+        String annotation = newEvent.getAnnotation();
+        if (!Objects.isNull(annotation)) {
+            event.setAnnotation(annotation);
+        }
+
         Long categoryId = newEvent.getCategory();
-        checkCategoryExistence(categoryId);
-        event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
-        event.setDescription(newEvent.getDescription());
-        event.setEventDate(newEvent.getEventDate());
+        if (!Objects.isNull(categoryId)) {
+            checkCategoryExistence(categoryId);
+            event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
+        }
+
+        String description = newEvent.getDescription();
+        if (!Objects.isNull(description)) {
+            event.setDescription(description);
+        }
+
+        LocalDateTime eventDate = newEvent.getEventDate();
+        if (!Objects.isNull(eventDate)) {
+            event.setEventDate(eventDate);
+        }
         LocationDto locationDto = newEvent.getLocation();
-        event.setLocation(saveTestedLocation(locationDto));
-        event.setPaid(newEvent.getPaid());
-        event.setParticipantLimit(newEvent.getParticipantLimit());
-        event.setRequestModeration(newEvent.getRequestModeration());
-        event.setState(Objects.equals(newEvent.getStateAction(), StateAction.PUBLISH_EVENT)
-                ? EventLifeState.PUBLISHED
-                : EventLifeState.CANCELED);
-        event.setTitle(newEvent.getTitle());
+        if (!Objects.isNull(locationDto)) {
+            event.setLocation(saveTestedLocation(locationDto));
+        }
+
+        boolean paid = newEvent.getPaid();
+        if (!Objects.isNull(paid)) {
+            event.setPaid(paid);
+        }
+
+        Integer limit = newEvent.getParticipantLimit();
+        if (!Objects.isNull(limit)) {
+            event.setParticipantLimit(limit);
+        }
+
+        boolean moderation = newEvent.getRequestModeration();
+        if (!Objects.isNull(moderation)) {
+            event.setRequestModeration(moderation);
+        }
+
+        StateAction state = newEvent.getStateAction();
+        if (!Objects.isNull(state)) {
+            event.setState(Objects.equals(state, StateAction.PUBLISH_EVENT)
+                    ? EventLifeState.PUBLISHED
+                    : EventLifeState.CANCELED);
+            event.setTitle(newEvent.getTitle());
+        }
+
+        String title = newEvent.getTitle();
+        if (!Objects.isNull(title)) {
+            event.setTitle(title);
+        }
 
         return eventMapper.toFullDto(eventRepository.save(event));
     }

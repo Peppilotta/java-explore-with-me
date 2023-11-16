@@ -5,11 +5,11 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventDtoByAdmin;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.event.dto.UpdateEventUserRequest;
 
 import java.util.List;
 
@@ -33,6 +33,5 @@ public interface EventService {
 
     EventFullDto getEventByAdmin(Long eventId);
 
-    EventFullDto patchEventByAdmin(Long eventId, UpdateEventDtoByAdmin newEvent);
-
+    EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest newEvent);
 }
