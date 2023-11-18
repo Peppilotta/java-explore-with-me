@@ -1,4 +1,4 @@
-package ru.practicum.priv;
+package ru.practicum.controllers;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.services.interfaces.RequestServicePrivate;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
 import javax.validation.constraints.Positive;

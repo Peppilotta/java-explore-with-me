@@ -1,4 +1,4 @@
-package ru.practicum.admin;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class UserServiceAdminImpl {
 
     // поправить
     public List<UserDto> getUsers(List<Long> ids, Pageable pageable) {
+        log.info("Get request for users:");
         for (Long id : ids) {
             log.info("id={}", id);
         }
@@ -43,7 +44,7 @@ public class UserServiceAdminImpl {
     }
 
     public UserDto deleteUser(Long id) {
-        log.info("Delete request - user id={} ", id);
+        log.info("Delete request for user with id={} ", id);
         checkUserExistence(id);
         User deletedUser = userRepository.findById(id).orElseGet(User::new);
         userRepository.deleteById(id);

@@ -1,7 +1,6 @@
-package ru.practicum.admin;
+package ru.practicum.controllers;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.services.UserServiceAdminImpl;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 
@@ -25,7 +25,6 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 @Validated
-@Slf4j
 public class UserControllerAdmin {
 
     private final UserServiceAdminImpl service;
@@ -40,13 +39,11 @@ public class UserControllerAdmin {
 
     @PostMapping()
     public UserDto create(@RequestBody @Valid final NewUserRequest userDto) {
-        log.info("Create user with body {}", userDto);
         return service.create(userDto);
     }
 
     @DeleteMapping("/{id}")
     public UserDto deleteUser(@PathVariable("id") @Positive long id) {
-        log.info("Delete user with id = {}", id);
         return service.deleteUser(id);
     }
 }

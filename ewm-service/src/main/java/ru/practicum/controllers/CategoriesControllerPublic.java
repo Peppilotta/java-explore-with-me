@@ -1,4 +1,4 @@
-package ru.practicum.pub;
+package ru.practicum.controllers;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.services.interfaces.CategoryServicePublic;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;

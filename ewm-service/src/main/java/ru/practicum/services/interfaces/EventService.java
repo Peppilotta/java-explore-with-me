@@ -1,4 +1,4 @@
-package ru.practicum.priv;
+package ru.practicum.services.interfaces;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.event.dto.EventFullDto;

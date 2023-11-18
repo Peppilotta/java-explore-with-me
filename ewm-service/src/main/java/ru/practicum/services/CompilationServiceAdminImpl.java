@@ -1,4 +1,4 @@
-package ru.practicum.admin;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +18,12 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.UpdateCompilationRequest;
+import ru.practicum.services.interfaces.CompilationServiceAdmin;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,8 +60,8 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
                 .stream()
                 .map(eventMapper::toShortDto)
                 .collect(Collectors.toList());
-        compilationRepository.deleteById(compId);
         eventCompilationRepository.deleteEvents(compId, eventIds);
+        compilationRepository.deleteById(compId);
         return compilationMapper.toCompilationDto(compilation, events);
     }
 
@@ -67,13 +69,21 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         log.info("Request for updating Compilation with id = {} and Updates = {}", compId, compilationNew);
         checkCompilationExists(compId);
         Compilation compilation = compilationRepository.findById(compId).orElseGet(Compilation::new);
-        compilation.setTitle(compilationNew.getTitle());
+        String title = compilationNew.getTitle();
+        if (!Objects.isNull(title)) {
+            compilation.setTitle(title);
+        }
         compilation.setPinned(compilationNew.getPinned());
         Compilation createdCompilation = compilationRepository.save(compilation);
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
         List<Long> newEventIds = compilationNew.getEvents();
         newEventIds.removeAll(eventIds);
-        return compilationMapper.toCompilationDto(createdCompilation, addEventToCompilation(newEventIds, compId));
+        List<Long> existedNewEventIds = newEventIds.stream()
+                .filter(eventRepository::existsById)
+                .collect(Collectors.toList());
+        List<EventShortDto> newEvents = addEventToCompilation(existedNewEventIds, compId);
+        newEvents.addAll(eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds)));
+        return compilationMapper.toCompilationDto(createdCompilation, newEvents);
     }
 
     private List<EventShortDto> addEventToCompilation(List<Long> eventIds, Long id) {

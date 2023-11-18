@@ -1,8 +1,7 @@
-package ru.practicum.pub;
+package ru.practicum.controllers;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.compilation.dto.CompilationDto;
+import ru.practicum.services.interfaces.CompilationServicePublic;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -18,22 +18,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/compilations")
 @Validated
-public class CompilationsController {
+public class CompilationsControllerPublic {
 
-    private static final String COMPILATION_ID_FIELD_NAME = "id";
+    private final CompilationServicePublic compilationService;
 
-    private final CompilationService compilationService;
-
-    public CompilationsController(CompilationService compilationService) {
+    public CompilationsControllerPublic(CompilationServicePublic compilationService) {
         this.compilationService = compilationService;
     }
 
     @GetMapping
-    List<CompilationDto> getCompilationsPageable(@RequestParam(defaultValue = "true") String pinned,
+    List<CompilationDto> getCompilationsPageable(@RequestParam(defaultValue = "true") boolean pinned,
                                                  @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                  @RequestParam(defaultValue = "10") @Positive Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size,
-                Sort.by(Sort.Direction.ASC, COMPILATION_ID_FIELD_NAME));
+        Pageable pageable = PageRequest.of(from / size, size);
 
         return compilationService.getCompilations(pinned, pageable);
     }

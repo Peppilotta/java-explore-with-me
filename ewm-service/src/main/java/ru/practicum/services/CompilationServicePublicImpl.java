@@ -1,4 +1,4 @@
-package ru.practicum.pub;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,7 @@ import ru.practicum.compilation.dto.CompilationMapper;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.services.interfaces.CompilationServicePublic;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CompilationServiceImpl implements CompilationService {
+public class CompilationServicePublicImpl implements CompilationServicePublic {
 
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
@@ -36,8 +37,10 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationMapper compilationMapper;
 
-    public List<CompilationDto> getCompilations(String pined, Pageable pageable) {
-        Page<Compilation> compilations = compilationRepository.getCompilationsByPinned(pined, pageable);
+    public List<CompilationDto> getCompilations(Boolean pinned, Pageable pageable) {
+        log.info("Get compilations public, pinned = {}", pinned);
+
+        Page<Compilation> compilations = compilationRepository.getCompilationsByPinned(pinned, pageable);
         List<CompilationDto> compilationDtos = new ArrayList<>();
         for (Compilation comp : compilations) {
             compilationDtos.add(compilationMapper.toCompilationDto(comp, getEvents(comp.getId())));
@@ -46,6 +49,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     public CompilationDto getCompilation(Long compId) {
+        log.info("Get compilation public, compId = {}", compId);
         checkCompilationExists(compId);
         return compilationMapper.toCompilationDto(
                 compilationRepository.findById(compId).orElseGet(Compilation::new), getEvents(compId));

@@ -1,4 +1,4 @@
-package ru.practicum.admin;
+package ru.practicum.controllers;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
-import ru.practicum.priv.EventService;
+import ru.practicum.services.interfaces.EventService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

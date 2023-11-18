@@ -1,8 +1,9 @@
-package ru.practicum.admin;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.services.interfaces.CategoryServiceAdmin;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.dto.NewCategoryDto;

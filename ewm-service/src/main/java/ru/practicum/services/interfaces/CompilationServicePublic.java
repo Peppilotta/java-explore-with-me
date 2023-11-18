@@ -1,13 +1,13 @@
-package ru.practicum.pub;
+package ru.practicum.services.interfaces;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.compilation.dto.CompilationDto;
 
 import java.util.List;
 
-public interface CompilationService {
+public interface CompilationServicePublic {
 
-    List<CompilationDto> getCompilations(String pined, Pageable pageable);
+    List<CompilationDto> getCompilations(Boolean pined, Pageable pageable);
 
     CompilationDto getCompilation(Long compId);
 }

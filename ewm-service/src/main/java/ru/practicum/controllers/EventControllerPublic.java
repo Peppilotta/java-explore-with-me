@@ -1,4 +1,4 @@
-package ru.practicum.pub;
+package ru.practicum.controllers;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +12,7 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.PublicEventFindParameters;
 import ru.practicum.event.dto.PublicEventsFindParameters;
+import ru.practicum.services.interfaces.EventServicePublic;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;

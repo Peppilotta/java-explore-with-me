@@ -1,4 +1,4 @@
-package ru.practicum.pub;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +18,7 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.event.storage.EventSpecification;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.services.interfaces.EventServicePublic;
 import ru.practicum.request.dto.RequestStatus;
 import ru.practicum.request.storage.RequestRepository;
 
@@ -39,6 +40,7 @@ public class EventServicePublicImpl implements EventServicePublic {
     private final StatsClient client;
 
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
+        log.info("Get events with parameters Public");
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
         int start = (int) pageable.getOffset();
         int end;
@@ -65,15 +67,18 @@ public class EventServicePublicImpl implements EventServicePublic {
             return new ArrayList<>();
         } else {
             eventRepository.updateViewsByEvents(eventsPageable);
+            log.info("views for events updated");
             return eventMapper.toShortDtos(eventRepository.findAllByEvents(eventsPageable));
         }
     }
 
     public EventFullDto getEvent(PublicEventFindParameters parameters) {
+        log.info("Get event with parameters Public");
         Long id = parameters.getEventId();
         checkEventExists(id);
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
         eventRepository.updateViewsById(id);
+        log.info("views for event with id={} updated", id);
         return eventMapper.toFullDto(eventRepository.findById(id).orElseGet(Event::new));
     }
 
@@ -96,6 +101,7 @@ public class EventServicePublicImpl implements EventServicePublic {
                 .uri(uri)
                 .ip(publicIp)
                 .build();
+        log.info("Statistic saved. Hit = {}", hit);
         ResponseEntity<Object> response = client.postHit(hit);
     }
 }

@@ -1,4 +1,4 @@
-package ru.practicum.admin;
+package ru.practicum.services.interfaces;
 
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;

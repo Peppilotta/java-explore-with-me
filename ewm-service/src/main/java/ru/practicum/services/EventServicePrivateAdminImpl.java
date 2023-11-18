@@ -1,4 +1,4 @@
-package ru.practicum.priv;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.StateAction;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
@@ -33,6 +34,7 @@ import ru.practicum.request.dto.RequestMapper;
 import ru.practicum.request.dto.RequestStatus;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.storage.RequestRepository;
+import ru.practicum.services.interfaces.EventService;
 import ru.practicum.user.dto.UserMapper;
 import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.storage.UserRepository;
@@ -46,7 +48,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class EventServiceImpl implements EventService {
+public class EventServicePrivateAdminImpl implements EventService {
 
     private final EventRepository eventRepository;
 
@@ -163,13 +165,14 @@ public class EventServiceImpl implements EventService {
         log.info("Request of participation from user with id={} for event with id={}", userId, eventId);
         checkUserExistence(userId);
         checkEventExistence(eventId);
+        checkUserEvent(userId, eventId);
         return requestMapper.toDtos(requestRepository.findByOwnerIdAndEventId(userId, eventId));
     }
 
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId,
                                                               Long eventId,
                                                               EventRequestStatusUpdateRequest requestUpdates) {
-        log.info("Update request of participation from user with id={} for event with id={} and updates = {}",
+        log.info("Update requests of participation from user with id={} for event with id={} and updates = {}",
                 userId, eventId, requestUpdates);
         List<Long> requestIds = requestUpdates.getRequestIds();
         if (Objects.isNull(requestIds)) {
@@ -193,18 +196,14 @@ public class EventServiceImpl implements EventService {
             }
             Long confirmed = requestRepository
                     .getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
-            if (Objects.equals(limit, confirmed)) {
-                request.setStatus(RequestStatus.REJECTED);
-                requestRepository.save(request);
-                checkRequestIntegrity("Requests limit to event with id=" + eventId + " is reached.");
+            if (Objects.equals(newStatus, RequestStatus.CONFIRMED)) {
+                if (limit < confirmed) {
+                    request.setStatus(RequestStatus.CONFIRMED);
+                    confirmedRequests.add(requestRepository.save(request));
+                }
             } else {
                 request.setStatus(newStatus);
-                requestRepository.save(request);
-                if (Objects.equals(newStatus, RequestStatus.CONFIRMED)) {
-                    confirmedRequests.add(request);
-                } else {
-                    rejectedRequests.add(request);
-                }
+                rejectedRequests.add(requestRepository.save(request));
             }
         }
 
@@ -228,6 +227,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());
         Long categoryId = updatedEvent.getCategory();
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
@@ -246,6 +246,15 @@ public class EventServiceImpl implements EventService {
         }
 
         return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByAdmin(event, updatedEvent)));
+    }
+
+    private void checkStateForAdminUpdate(StateAction action, EventLifeState lifeState) {
+        if ((Objects.equals(action, StateAction.PUBLISH_EVENT) && !Objects.equals(lifeState, EventLifeState.PENDING))
+                || (Objects.equals(action, StateAction.REJECT_EVENT) && Objects.equals(lifeState, EventLifeState.PUBLISHED))) {
+            apiErrorConflict.setMessage("Illegal actions with State");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
+            throw new NotFoundException(apiErrorConflict);
+        }
     }
 
     private void checkEventTime(LocalDateTime eventDate) {

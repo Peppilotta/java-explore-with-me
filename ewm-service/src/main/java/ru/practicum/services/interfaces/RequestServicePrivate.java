@@ -1,4 +1,4 @@
-package ru.practicum.priv;
+package ru.practicum.services.interfaces;
 
 import ru.practicum.request.dto.ParticipationRequestDto;
 

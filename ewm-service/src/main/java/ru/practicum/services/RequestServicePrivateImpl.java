@@ -1,4 +1,4 @@
-package ru.practicum.priv;
+package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import ru.practicum.request.dto.RequestMapper;
 import ru.practicum.request.dto.RequestStatus;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.storage.RequestRepository;
+import ru.practicum.services.interfaces.RequestServicePrivate;
 import ru.practicum.user.model.User;
 import ru.practicum.user.storage.UserRepository;
 
@@ -42,7 +43,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
             .build();
 
     public List<ParticipationRequestDto> getRequests(Long userId) {
-        log.info("Get requests from user with id={} ", userId);
+        log.info("Get requests from user with id={} to events of other user ", userId);
         checkUserExistence(userId);
         return requestMapper.toDtos(requestRepository.findByUserId(userId));
     }
@@ -78,14 +79,34 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
     private void checkEventAvailable(Long confirmedRequests, Event event, Long userId) {
         Integer maxParticipants = event.getParticipantLimit();
         Long eventId = event.getId();
-        if (maxParticipants > 0 && confirmedRequests >= maxParticipants
-                || !requestRepository.findByUserIdAndEventId(userId, eventId).isEmpty()
-                || !Objects.equals(event.getState(), EventLifeState.PUBLISHED)
-                || Objects.equals(userId, event.getInitiator().getId())) {
+        boolean conditionForConflict = false;
+        StringBuilder message = new StringBuilder();
+        if (maxParticipants > 0 && confirmedRequests >= maxParticipants) {
+            message.append("ParticipantLimit is reached");
+            conditionForConflict = true;
+        }
+
+        if (!requestRepository.findByUserIdAndEventId(userId, eventId).isEmpty()) {
+            message.append("Repeat request from user with id=")
+                    .append(userId)
+                    .append(" to event with id=")
+                    .append(event.getId());
+            conditionForConflict = true;
+        }
+
+        if (!Objects.equals(event.getState(), EventLifeState.PUBLISHED)) {
+            message.append("Event not published yet.");
+            conditionForConflict = true;
+        }
+
+        if (Objects.equals(userId, event.getInitiator().getId())) {
+            message.append("Request to own event.");
+            conditionForConflict = true;
+        }
+        if (conditionForConflict) {
+
             ApiError apiErrorConflict = ApiError.builder()
-                    .message("could not execute statement; SQL [n/a]; constraint [uq_category_name]; " +
-                            "nested exception is org.hibernate.exception.ConstraintViolationException: " +
-                            "could not execute statement")
+                    .message(message.toString())
                     .reason("Integrity constraint has been violated.")
                     .status(ErrorStatus.E_409_CONFLICT.getValue())
                     .timestamp(LocalDateTime.now())
