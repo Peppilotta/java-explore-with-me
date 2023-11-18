@@ -27,7 +27,7 @@ public class NewCompilationDto {
 
     @NotNull(message = "Field: title. Error: must not be blank. Value: null")
     @NotBlank(message = "Field: title. Error: must not be blank. Value: blank")
-    @Size(min = 1, max = 50, message = "Size of '${validatedValue}' must be between {min) and {max}")
+    @Size(min = 1, max = 50, message = "Size of '${validatedValue}' must be between {min} and {max}")
     private String title;
 
     @Singular

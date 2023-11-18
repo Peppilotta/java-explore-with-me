@@ -14,8 +14,6 @@ import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.ReviewAction;
-import ru.practicum.event.dto.StateAction;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
@@ -141,41 +139,24 @@ public class EventServiceImpl implements EventService {
             checkUserEvent(userId, initiator.getId());
             event.setInitiator(userMapper.fromShort(initiator));
         }
-        event.setAnnotation(eventUpdate.getAnnotation());
-        event.setDescription(eventUpdate.getDescription());
+
+        Long categoryId = eventUpdate.getCategory();
+        if (!Objects.isNull(categoryId)) {
+            checkCategoryExistence(categoryId);
+            event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
+        }
+
         LocalDateTime date = eventUpdate.getEventDate();
-        checkEventTime(date);
         if (!Objects.isNull(date)) {
+            checkEventTime(date);
             event.setEventDate(date);
         }
         LocationDto locationDto = eventUpdate.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
         }
-        Boolean paid = eventUpdate.getPaid();
-        if (!Objects.isNull(paid)) {
-            event.setPaid(paid);
-        }
-        Integer participantLimit = eventUpdate.getParticipantLimit();
-        if (!Objects.isNull(participantLimit)) {
-            event.setParticipantLimit(participantLimit);
-        }
-        Boolean requestModeration = eventUpdate.getRequestModeration();
-        if (!Objects.isNull(requestModeration)) {
-            event.setRequestModeration(requestModeration);
-        }
-        ReviewAction stateAction = eventUpdate.getStateAction();
-        if (!Objects.isNull(stateAction)) {
-            event.setState(Objects.equals(stateAction, ReviewAction.CANCEL_REVIEW)
-                    ? EventLifeState.CANCELED
-                    : EventLifeState.PENDING);
-        }
-        String title = eventUpdate.getTitle();
-        if (!Objects.isNull(title)) {
-            event.setTitle(title);
-        }
 
-        return eventMapper.toFullDto(eventRepository.save(event));
+        return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));
     }
 
     public List<ParticipationRequestDto> getRequestsForParticipation(Long userId, Long eventId) {
@@ -244,63 +225,27 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
     }
 
-    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest newEvent) {
+    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        String annotation = newEvent.getAnnotation();
-        if (!Objects.isNull(annotation)) {
-            event.setAnnotation(annotation);
-        }
-
-        Long categoryId = newEvent.getCategory();
+        Long categoryId = updatedEvent.getCategory();
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
         }
 
-        String description = newEvent.getDescription();
-        if (!Objects.isNull(description)) {
-            event.setDescription(description);
-        }
-
-        LocalDateTime eventDate = newEvent.getEventDate();
+        LocalDateTime eventDate = updatedEvent.getEventDate();
         if (!Objects.isNull(eventDate)) {
+            checkEventTime(eventDate);
             event.setEventDate(eventDate);
         }
-        LocationDto locationDto = newEvent.getLocation();
+
+        LocationDto locationDto = updatedEvent.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
         }
 
-        boolean paid = newEvent.getPaid();
-        if (!Objects.isNull(paid)) {
-            event.setPaid(paid);
-        }
-
-        Integer limit = newEvent.getParticipantLimit();
-        if (!Objects.isNull(limit)) {
-            event.setParticipantLimit(limit);
-        }
-
-        boolean moderation = newEvent.getRequestModeration();
-        if (!Objects.isNull(moderation)) {
-            event.setRequestModeration(moderation);
-        }
-
-        StateAction state = newEvent.getStateAction();
-        if (!Objects.isNull(state)) {
-            event.setState(Objects.equals(state, StateAction.PUBLISH_EVENT)
-                    ? EventLifeState.PUBLISHED
-                    : EventLifeState.CANCELED);
-            event.setTitle(newEvent.getTitle());
-        }
-
-        String title = newEvent.getTitle();
-        if (!Objects.isNull(title)) {
-            event.setTitle(title);
-        }
-
-        return eventMapper.toFullDto(eventRepository.save(event));
+        return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByAdmin(event, updatedEvent)));
     }
 
     private void checkEventTime(LocalDateTime eventDate) {

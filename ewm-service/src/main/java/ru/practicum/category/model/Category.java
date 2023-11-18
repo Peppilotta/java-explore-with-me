@@ -22,6 +22,7 @@ import java.util.List;
 @Table(name = "categories")
 @Getter
 @Setter
+//@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)

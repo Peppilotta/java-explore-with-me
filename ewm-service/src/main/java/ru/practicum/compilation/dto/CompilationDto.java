@@ -28,6 +28,7 @@ public class CompilationDto {
     @Positive
     private Long id;
 
+    @NotNull
     private Boolean pinned;
 
     @NotNull

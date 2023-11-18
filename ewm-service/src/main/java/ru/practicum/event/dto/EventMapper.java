@@ -12,6 +12,7 @@ import ru.practicum.request.storage.RequestRepository;
 import ru.practicum.user.dto.UserMapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -92,5 +93,77 @@ public class EventMapper {
                 .eventDate(event.getEventDate())
                 .initiator(userMapper.toUserShort(event.getInitiator()))
                 .build();
+    }
+
+    public Event fromUpdatedByUser(Event event, UpdateEventUserRequest eventUpdate) {
+        String annotation = eventUpdate.getAnnotation();
+        if (!Objects.isNull(annotation)) {
+            event.setAnnotation(annotation);
+        }
+
+        String description = eventUpdate.getDescription();
+        if (!Objects.isNull(description)) {
+            event.setDescription(description);
+        }
+
+        Boolean paid = eventUpdate.getPaid();
+        if (!Objects.isNull(paid)) {
+            event.setPaid(paid);
+        }
+        Integer participantLimit = eventUpdate.getParticipantLimit();
+        if (!Objects.isNull(participantLimit)) {
+            event.setParticipantLimit(participantLimit);
+        }
+        Boolean requestModeration = eventUpdate.getRequestModeration();
+        if (!Objects.isNull(requestModeration)) {
+            event.setRequestModeration(requestModeration);
+        }
+        ReviewAction action = eventUpdate.getStateAction();
+        if (!Objects.isNull(action)) {
+            event.setState(Objects.equals(action, ReviewAction.CANCEL_REVIEW)
+                    ? EventLifeState.CANCELED
+                    : EventLifeState.PENDING);
+        }
+        String title = eventUpdate.getTitle();
+        if (!Objects.isNull(title)) {
+            event.setTitle(title);
+        }
+        return event;
+    }
+
+    public Event fromUpdatedByAdmin(Event event, UpdateEventAdminRequest eventUpdate) {
+        String annotation = eventUpdate.getAnnotation();
+        if (!Objects.isNull(annotation)) {
+            event.setAnnotation(annotation);
+        }
+
+        String description = eventUpdate.getDescription();
+        if (!Objects.isNull(description)) {
+            event.setDescription(description);
+        }
+
+        Boolean paid = eventUpdate.getPaid();
+        if (!Objects.isNull(paid)) {
+            event.setPaid(paid);
+        }
+        Integer participantLimit = eventUpdate.getParticipantLimit();
+        if (!Objects.isNull(participantLimit)) {
+            event.setParticipantLimit(participantLimit);
+        }
+        Boolean requestModeration = eventUpdate.getRequestModeration();
+        if (!Objects.isNull(requestModeration)) {
+            event.setRequestModeration(requestModeration);
+        }
+        StateAction stateAction = eventUpdate.getStateAction();
+        if (!Objects.isNull(stateAction)) {
+            event.setState(Objects.equals(stateAction, StateAction.PUBLISH_EVENT)
+                    ? EventLifeState.PUBLISHED
+                    : EventLifeState.CANCELED);
+        }
+        String title = eventUpdate.getTitle();
+        if (!Objects.isNull(title)) {
+            event.setTitle(title);
+        }
+        return event;
     }
 }

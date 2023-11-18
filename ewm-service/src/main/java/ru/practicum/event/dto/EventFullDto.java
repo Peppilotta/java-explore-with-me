@@ -28,6 +28,10 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class EventFullDto {
     @NotNull
+    @Positive
+    private Long id;
+
+    @NotNull
     @NotBlank
     private String annotation;
 
@@ -45,10 +49,6 @@ public class EventFullDto {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-
-    @NotNull
-    @Positive
-    private Long id;
 
     @NotNull
     private UserShortDto initiator;
