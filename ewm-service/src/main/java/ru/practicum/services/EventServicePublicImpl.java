@@ -14,17 +14,20 @@ import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.PublicEventFindParameters;
 import ru.practicum.event.dto.PublicEventsFindParameters;
+import ru.practicum.event.dto.SortEvent;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.event.storage.EventSpecification;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.services.interfaces.EventServicePublic;
 import ru.practicum.request.dto.RequestStatus;
 import ru.practicum.request.storage.RequestRepository;
+import ru.practicum.services.interfaces.EventServicePublic;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,7 +71,20 @@ public class EventServicePublicImpl implements EventServicePublic {
         } else {
             eventRepository.updateViewsByEvents(eventsPageable);
             log.info("views for events updated");
-            return eventMapper.toShortDtos(eventRepository.findAllByEvents(eventsPageable));
+
+            List<Event> eventsFoundedByParameters = eventRepository.findAllByEvents(eventsPageable);
+
+            if (!Objects.isNull(parameters.getSort()) && SortEvent.existsByName(parameters.getSort())) {
+                SortEvent sort = SortEvent.valueOf(parameters.getSort());
+                if (Objects.equals(sort, SortEvent.EVENT_DATE)) {
+                    eventsFoundedByParameters.sort(Comparator.comparing(Event::getEventDate));
+                }
+                if (Objects.equals(sort, SortEvent.VIEWS)) {
+                    eventsFoundedByParameters.sort(Comparator.comparing(Event::getViews));
+                }
+            }
+
+            return eventMapper.toShortDtos(eventsFoundedByParameters);
         }
     }
 

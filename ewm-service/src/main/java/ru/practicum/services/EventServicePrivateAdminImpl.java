@@ -8,11 +8,11 @@ import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
+import ru.practicum.event.dto.AdminEventsFindParameters;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventLifeState;
 import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.StateAction;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
@@ -92,7 +92,7 @@ public class EventServicePrivateAdminImpl implements EventService {
             .build();
 
     public List<EventShortDto> getEvents(Long userId, Pageable pageable) {
-        log.info("Get request for events of user with id={}", userId);
+        log.info("Get events of user with id={}", userId);
         checkUserExistence(userId);
         return eventRepository.findAllByUserId(userId, pageable)
                 .stream()
@@ -101,7 +101,7 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     public EventFullDto addEvent(Long userId, NewEventDto event) {
-        log.info("Create request  of user with id={} for event = {}", userId, event);
+        log.info("Create event from user with id={}. Event = {}", userId, event);
         checkEventTime(event.getEventDate());
         checkUserExistence(userId);
         if (Objects.isNull(event.getInitiator())) {
@@ -211,7 +211,7 @@ public class EventServicePrivateAdminImpl implements EventService {
                 requestMapper.toDtos(rejectedRequests));
     }
 
-    public List<EventFullDto> getEventsByAdmin(EventsFindParameters parameters, Pageable pageable) {
+    public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
         log.info("Request for list Events according parameters {}", parameters);
         return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
                 .stream()
@@ -225,6 +225,7 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
+        log.info("Update event with id={} by admin. Updates = {}", eventId, updatedEvent);
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());

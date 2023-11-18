@@ -6,8 +6,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.Category_;
+import ru.practicum.event.dto.AdminEventsFindParameters;
 import ru.practicum.event.dto.EventLifeState;
-import ru.practicum.event.dto.EventsFindParameters;
 import ru.practicum.event.dto.PublicEventsFindParameters;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Event_;
@@ -29,7 +29,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class EventSpecification {
 
-    public Specification<Event> getEventsByParameters(EventsFindParameters findParameters) {
+    public Specification<Event> getEventsByParameters(AdminEventsFindParameters findParameters) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             log.info("into Specification parameters for admin");
@@ -80,6 +80,7 @@ public class EventSpecification {
                     log.info("Time criteria added - start and end");
                 }
             }
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }

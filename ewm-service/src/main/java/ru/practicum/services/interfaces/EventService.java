@@ -3,7 +3,7 @@ package ru.practicum.services.interfaces;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.EventsFindParameters;
+import ru.practicum.event.dto.AdminEventsFindParameters;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
@@ -29,7 +29,7 @@ public interface EventService {
                                                        Long eventId,
                                                        EventRequestStatusUpdateRequest request);
 
-    List<EventFullDto> getEventsByAdmin(EventsFindParameters parameters, Pageable pageable);
+    List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable);
 
     EventFullDto getEventByAdmin(Long eventId);
 

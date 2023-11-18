@@ -72,9 +72,20 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         checkUserExistence(userId);
         checkRequestExistence(requestId);
         Request request = requestRepository.findById(requestId).orElseGet(Request::new);
+        checkUserIsRequester(userId, request.getRequester().getId());
         request.setStatus(RequestStatus.CANCELED);
         return requestMapper.toDto(requestRepository.save(request));
     }
+
+    private void checkUserIsRequester(Long userId, Long requesterId) {
+        if (!Objects.equals(userId, requesterId)) {
+            apiError.setMessage("User with id=" + userId
+                    + " can't edit request with requester.id=" + requesterId);
+            apiError.setTimestamp(LocalDateTime.now());
+            throw new NotFoundException(apiError);
+        }
+    }
+
 
     private void checkEventAvailable(Long confirmedRequests, Event event, Long userId) {
         Integer maxParticipants = event.getParticipantLimit();

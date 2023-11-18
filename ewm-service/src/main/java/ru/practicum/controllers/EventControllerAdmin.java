@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventsFindParameters;
+import ru.practicum.event.dto.AdminEventsFindParameters;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.services.interfaces.EventService;
 
@@ -48,7 +48,7 @@ public class EventControllerAdmin {
                                         @RequestParam(required = false) String rangeEnd,
                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
-        EventsFindParameters eventsFindParameters = EventsFindParameters.builder()
+        AdminEventsFindParameters eventsFindParameters = AdminEventsFindParameters.builder()
                 .users(Objects.isNull(users) ? new ArrayList<>() : users)
                 .states(Objects.isNull(states) ? new ArrayList<>() : states)
                 .categories(Objects.isNull(categories) ? new ArrayList<>() : categories)

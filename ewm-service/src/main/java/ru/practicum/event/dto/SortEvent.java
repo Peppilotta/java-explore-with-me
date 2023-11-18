@@ -1,5 +1,7 @@
 package ru.practicum.event.dto;
 
+import java.util.Objects;
+
 public enum SortEvent {
     EVENT_DATE("EVENT_DATE"),
     VIEWS("VIEWS");
@@ -18,4 +20,14 @@ public enum SortEvent {
     public String toString() {
         return String.valueOf(value);
     }
+
+    public static boolean existsByName(String sort) {
+        for (SortEvent sortEvent : values()) {
+            if (Objects.equals(sortEvent.name(), sort)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
