@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
@@ -15,6 +16,7 @@ import ru.practicum.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,20 +28,26 @@ public class UserServiceAdminImpl {
 
     private final UserMapper userMapper;
 
-    // поправить
     public List<UserDto> getUsers(List<Long> ids, Pageable pageable) {
         log.info("Get request for users:");
-        for (Long id : ids) {
-            log.info("id={}", id);
+
+        if (Objects.isNull(ids)) {
+            return userRepository.findAll(pageable).stream()
+                    .map(userMapper::toDto)
+                    .collect(Collectors.toList());
+        } else {
+            for (Long id : ids) {
+                log.info("id={}", id);
+            }
+            return userRepository.findAllByIds(ids, pageable).stream()
+                    .map(userMapper::toDto)
+                    .collect(Collectors.toList());
         }
-        return userRepository.findAllByIds(ids, pageable)
-                .stream()
-                .map(userMapper::toDto)
-                .collect(Collectors.toList());
     }
 
     public UserDto create(NewUserRequest user) {
         log.info("Create request for user {}", user);
+        checkEmail(user.getEmail());
         return userMapper.toDto(userRepository.save(userMapper.toUserFromNew(user)));
     }
 
@@ -61,6 +69,18 @@ public class UserServiceAdminImpl {
                     .timestamp(LocalDateTime.now())
                     .build();
             throw new NotFoundException(apiError);
+        }
+    }
+
+    private void checkEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            ApiError apiError = ApiError.builder()
+                    .message("User with email=" + email + " not exists.")
+                    .reason("Integrity constraint has been violated.")
+                    .status(ErrorStatus.E_409_CONFLICT.getValue())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            throw new ConflictException(apiError);
         }
     }
 }

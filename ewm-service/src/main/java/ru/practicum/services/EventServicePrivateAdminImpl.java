@@ -165,7 +165,6 @@ public class EventServicePrivateAdminImpl implements EventService {
         log.info("Request of participation from user with id={} for event with id={}", userId, eventId);
         checkUserExistence(userId);
         checkEventExistence(eventId);
-        checkUserEvent(userId, eventId);
         return requestMapper.toDtos(requestRepository.findByOwnerIdAndEventId(userId, eventId));
     }
 
@@ -228,6 +227,7 @@ public class EventServicePrivateAdminImpl implements EventService {
         log.info("Update event with id={} by admin. Updates = {}", eventId, updatedEvent);
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        EventLifeState initialState = event.getState();
         checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());
         Long categoryId = updatedEvent.getCategory();
         if (!Objects.isNull(categoryId)) {
@@ -245,8 +245,12 @@ public class EventServicePrivateAdminImpl implements EventService {
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
         }
-
-        return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByAdmin(event, updatedEvent)));
+        Event eventForSave = eventMapper.fromUpdatedByAdmin(event, updatedEvent);
+        EventLifeState changedState = eventForSave.getState();
+        if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
+            eventForSave.setPublishedOn(LocalDateTime.now());
+        }
+        return eventMapper.toFullDto(eventRepository.save(eventForSave));
     }
 
     private void checkStateForAdminUpdate(StateAction action, EventLifeState lifeState) {
@@ -254,15 +258,15 @@ public class EventServicePrivateAdminImpl implements EventService {
                 || (Objects.equals(action, StateAction.REJECT_EVENT) && Objects.equals(lifeState, EventLifeState.PUBLISHED))) {
             apiErrorConflict.setMessage("Illegal actions with State");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
-            throw new NotFoundException(apiErrorConflict);
+            throw new ConflictException(apiErrorConflict);
         }
     }
 
     private void checkEventTime(LocalDateTime eventDate) {
         if (LocalDateTime.now().plusHours(2).isAfter(eventDate)) {
-            apiError.setMessage("Field: eventDate. Error: Time must be in the future. Value:" + eventDate);
-            apiError.setTimestamp(LocalDateTime.now());
-            throw new ConflictException(apiError);
+            apiErrorBadRequest.setMessage("Field: eventDate. Error: Time must be in the future. Value:" + eventDate);
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
         }
     }
 

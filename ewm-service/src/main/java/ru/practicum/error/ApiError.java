@@ -22,11 +22,11 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class ApiError {
 
-    private String message;
+    private String status;
 
     private String reason;
 
-    private String status;
+    private String message;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

@@ -35,7 +35,7 @@ public class Category {
 
     @NotNull(message = "Field: name. Error: must not be blank. Value: null")
     @NotBlank(message = "Field: name. Error: must not be blank. Value: blank")
-    @Column(name = "name", unique = true)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "category")

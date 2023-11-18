@@ -3,7 +3,6 @@ package ru.practicum.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.services.interfaces.CategoryServiceAdmin;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.dto.NewCategoryDto;
@@ -14,6 +13,7 @@ import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.services.interfaces.CategoryServiceAdmin;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,12 +31,14 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
 
     public CategoryDto addCategory(NewCategoryDto newCategory) {
         log.info("Request for creating Category = {}", newCategory);
+        checkCategoryNameUnique(newCategory.getName());
         return categoryMapper.toDto(categoryRepository.save(categoryMapper.toCategory(newCategory)));
     }
 
     public CategoryDto editCategory(Long catId, NewCategoryDto category) {
         log.info("Request for updating Category with id = {}", catId);
         checkCategoryExists(catId);
+        checkCategoryNameUnique(category.getName());
         Category updatedCategory = categoryRepository.findById(catId).orElseGet(Category::new);
         updatedCategory.setName(category.getName());
         log.info("Category updated. {}", updatedCategory);
@@ -83,6 +85,18 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
         if (!eventRepository.findAllByCategoryId(catId).isEmpty()) {
             ApiError apiError = ApiError.builder()
                     .message("The category is not empty")
+                    .reason("For the requested operation the conditions are not met.")
+                    .status(ErrorStatus.E_409_CONFLICT.getValue())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            throw new ConflictException(apiError);
+        }
+    }
+
+    private void checkCategoryNameUnique(String name) {
+        if (categoryRepository.existsByName(name)) {
+            ApiError apiError = ApiError.builder()
+                    .message("The category with name = " + name + " exists")
                     .reason("For the requested operation the conditions are not met.")
                     .status(ErrorStatus.E_409_CONFLICT.getValue())
                     .timestamp(LocalDateTime.now())

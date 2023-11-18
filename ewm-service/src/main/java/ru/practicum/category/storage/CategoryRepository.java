@@ -18,4 +18,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("select c from Category as c")
     Page<Category> findAllPageable(@Nullable Pageable pageable);
+
+    boolean existsByName(String name);
 }
