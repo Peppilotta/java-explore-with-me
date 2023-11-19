@@ -97,15 +97,18 @@ public class EventSpecification {
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
             predicates.add(criteriaBuilder.equal(root.get(Event_.state), EventLifeState.PUBLISHED));
             String text = findParameters.getText();
-            if (!Objects.isNull(text) && text.length() > 0) {
-                String pattern = "%" + text.trim().toLowerCase() + "%";
-                predicates
-                        .add(criteriaBuilder
-                                .or(
-                                        criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), pattern),
-                                        criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
+            if (!Objects.isNull(text)) {
+                String modified = text.trim();
+                if (modified.length() > 0) {
+                    String pattern = "%" + modified.toLowerCase() + "%";
+                    predicates
+                            .add(criteriaBuilder
+                                    .or(
+                                            criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), pattern),
+                                            criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
 
-                log.info("Criteria added: text = {}", text);
+                    log.info("Criteria added: text = {}", text);
+                }
             }
             List<Long> categories = findParameters.getCategories();
             if (!Objects.isNull(categories) && !categories.isEmpty()) {
