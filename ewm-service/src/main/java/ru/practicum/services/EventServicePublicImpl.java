@@ -10,6 +10,7 @@ import ru.practicum.StatsClient;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.EventLifeState;
 import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.PublicEventFindParameters;
@@ -92,16 +93,31 @@ public class EventServicePublicImpl implements EventServicePublic {
         log.info("Get event with parameters Public");
         Long id = parameters.getEventId();
         checkEventExists(id);
+        Event event = eventRepository.findById(id).orElseGet(Event::new);
+        checkEventPublished(event.getState());
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
         eventRepository.updateViewsById(id);
         log.info("views for event with id={} updated", id);
-        return eventMapper.toFullDto(eventRepository.findById(id).orElseGet(Event::new));
+        return eventMapper.toFullDto(event);
     }
 
     private void checkEventExists(Long id) {
         if (!eventRepository.existsById(id)) {
             ApiError apiError = ApiError.builder()
                     .message("Event with id=" + id + " was not found")
+                    .reason("The required object was not found.")
+                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            throw new NotFoundException(apiError);
+        }
+    }
+
+    private void checkEventPublished(EventLifeState state) {
+
+        if (!Objects.equals(state, EventLifeState.PUBLISHED)) {
+            ApiError apiError = ApiError.builder()
+                    .message("Event not Published")
                     .reason("The required object was not found.")
                     .status(ErrorStatus.E_404_NOT_FOUND.getValue())
                     .timestamp(LocalDateTime.now())
