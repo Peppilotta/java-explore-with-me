@@ -17,6 +17,7 @@ import ru.practicum.services.interfaces.CategoryServiceAdmin;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -31,14 +32,14 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
 
     public CategoryDto addCategory(NewCategoryDto newCategory) {
         log.info("Request for creating Category = {}", newCategory);
-        checkCategoryNameUnique(newCategory.getName());
+        checkCategoryNameUnique(newCategory.getName(), 0L);
         return categoryMapper.toDto(categoryRepository.save(categoryMapper.toCategory(newCategory)));
     }
 
     public CategoryDto editCategory(Long catId, NewCategoryDto category) {
         log.info("Request for updating Category with id = {}", catId);
         checkCategoryExists(catId);
-        checkCategoryNameUnique(category.getName());
+        checkCategoryNameUnique(category.getName(), catId);
         Category updatedCategory = categoryRepository.findById(catId).orElseGet(Category::new);
         updatedCategory.setName(category.getName());
         log.info("Category updated. {}", updatedCategory);
@@ -93,14 +94,16 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
         }
     }
 
-    private void checkCategoryNameUnique(String name) {
-        if (categoryRepository.existsByName(name)) {
-            ApiError apiError = ApiError.builder()
-                    .message("The category with name = " + name + " exists")
-                    .reason("For the requested operation the conditions are not met.")
-                    .status(ErrorStatus.E_409_CONFLICT.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+    private void checkCategoryNameUnique(String name, Long id) {
+        ApiError apiError = ApiError.builder()
+                .message("The category with name = " + name + " exists")
+                .reason("For the requested operation the conditions are not met.")
+                .status(ErrorStatus.E_409_CONFLICT.getValue())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        if (categoryRepository.existsByName(name)
+                && (id == 0 || !Objects.equals((categoryRepository.findByName(name).getId()), id))) {
             throw new ConflictException(apiError);
         }
     }

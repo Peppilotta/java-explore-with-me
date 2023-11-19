@@ -20,4 +20,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Page<Category> findAllPageable(@Nullable Pageable pageable);
 
     boolean existsByName(String name);
+
+    Category findByName(String name);
 }

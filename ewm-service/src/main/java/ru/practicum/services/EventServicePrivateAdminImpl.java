@@ -220,26 +220,6 @@ public class EventServicePrivateAdminImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
-    private void checkUsersInParameters(List<Long> users) {
-        if (!Objects.isNull(users) && !users.isEmpty()) {
-            apiErrorBadRequest.setMessage("Bad users parameter");
-            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
-            users.forEach(u ->
-                    userRepository.findById(u).orElseThrow(() ->
-                            new BadRequestException(apiErrorBadRequest)));
-        }
-    }
-
-    private void checkCategoriesInParameters(List<Long> categories) {
-        if (!Objects.isNull(categories) && !categories.isEmpty()) {
-            apiErrorBadRequest.setMessage("Bad categories parameter");
-            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
-            categories.forEach(u ->
-                    categoryRepository.findById(u).orElseThrow(() ->
-                            new BadRequestException(apiErrorBadRequest)));
-        }
-    }
-
     public EventFullDto getEventByAdmin(Long eventId) {
         checkEventExistence(eventId);
         return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
@@ -273,6 +253,26 @@ public class EventServicePrivateAdminImpl implements EventService {
             eventForSave.setPublishedOn(LocalDateTime.now());
         }
         return eventMapper.toFullDto(eventRepository.save(eventForSave));
+    }
+
+    private void checkUsersInParameters(List<Long> users) {
+        if (!Objects.isNull(users) && !users.isEmpty()) {
+            apiErrorBadRequest.setMessage("Bad users parameter");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            users.forEach(u ->
+                    userRepository.findById(u).orElseThrow(() ->
+                            new BadRequestException(apiErrorBadRequest)));
+        }
+    }
+
+    private void checkCategoriesInParameters(List<Long> categories) {
+        if (!Objects.isNull(categories) && !categories.isEmpty()) {
+            apiErrorBadRequest.setMessage("Bad categories parameter");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            categories.forEach(u ->
+                    categoryRepository.findById(u).orElseThrow(() ->
+                            new BadRequestException(apiErrorBadRequest)));
+        }
     }
 
     private void checkStateForAdminUpdate(StateAction action, EventLifeState lifeState) {

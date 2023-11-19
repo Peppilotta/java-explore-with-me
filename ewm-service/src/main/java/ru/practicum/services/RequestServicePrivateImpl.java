@@ -56,13 +56,21 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
                 .getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventAvailable(confirmedRequests, event, userId);
+        Integer limit = event.getParticipantLimit();
+        RequestStatus status = RequestStatus.PENDING;
+        if (limit == 0) {
+            status = RequestStatus.CONFIRMED;
+        } else {
+            if (Boolean.FALSE.equals(event.getRequestModeration())) {
+                status = RequestStatus.CONFIRMED;
+            }
+        }
+
         Request request = Request.builder()
                 .event(event)
                 .requester(userRepository.findById(userId).orElseGet(User::new))
                 .created(LocalDateTime.now())
-                .status(Boolean.TRUE.equals(event.getRequestModeration())
-                        ? RequestStatus.PENDING
-                        : RequestStatus.CONFIRMED)
+                .status(status)
                 .build();
         return requestMapper.toDto(requestRepository.save(request));
     }
@@ -85,7 +93,6 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
             throw new NotFoundException(apiError);
         }
     }
-
 
     private void checkEventAvailable(Long confirmedRequests, Event event, Long userId) {
         Integer maxParticipants = event.getParticipantLimit();

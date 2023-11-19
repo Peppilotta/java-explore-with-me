@@ -46,9 +46,12 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
 
         Compilation compilation = compilationMapper.toCompilation(compilationDto);
         Compilation createdCompilation = compilationRepository.save(compilation);
-        return compilationMapper
-                .toCompilationDto(createdCompilation, addEventToCompilation(
-                        compilationDto.getEvents(), createdCompilation.getId()));
+        List<Long> eventIds = compilationDto.getEvents();
+        List<EventShortDto> events = new ArrayList<>();
+        if (!Objects.isNull(eventIds) && !eventIds.isEmpty()) {
+            events.addAll(addEventToCompilation(eventIds, createdCompilation.getId()));
+        }
+        return compilationMapper.toCompilationDto(createdCompilation, events);
     }
 
     public CompilationDto deleteCompilation(Long compId) {
@@ -77,7 +80,9 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         Compilation createdCompilation = compilationRepository.save(compilation);
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
         List<Long> newEventIds = compilationNew.getEvents();
-        newEventIds.removeAll(eventIds);
+        if (!eventIds.isEmpty()) {
+            newEventIds.removeAll(eventIds);
+        }
         List<Long> existedNewEventIds = newEventIds.stream()
                 .filter(eventRepository::existsById)
                 .collect(Collectors.toList());
