@@ -212,6 +212,12 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
         log.info("Request for list Events according parameters {}", parameters);
+        if (!Objects.isNull(parameters.getUsers())) {
+            parameters.getUsers().forEach(this::checkUserExistence);
+        }
+        if (!Objects.isNull(parameters.getCategories())) {
+            parameters.getCategories().forEach(this::checkCategoryExistence);
+        }
         return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
                 .stream()
                 .map(eventMapper::toFullDto)

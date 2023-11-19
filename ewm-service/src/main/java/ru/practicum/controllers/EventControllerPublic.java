@@ -17,7 +17,6 @@ import ru.practicum.event.dto.PublicEventsFindParameters;
 import ru.practicum.services.interfaces.EventServicePublic;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -41,7 +40,7 @@ public class EventControllerPublic {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<EventShortDto> getEvents(@RequestParam(required = false) @NotBlank String text,
+    public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
                                          @RequestParam(required = false) List<Long> categories,
                                          @RequestParam(required = false) Boolean paid,
                                          @RequestParam(required = false) String rangeStart,

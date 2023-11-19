@@ -75,7 +75,7 @@ public class EventSpecification {
             LocalDateTime end = findParameters.getRangeEnd();
             if (Objects.isNull(end)) {
                 if (!Objects.isNull(start)) {
-                    predicates.add(criteriaBuilder.greaterThan(root.get(Event_.eventDate), start));
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(Event_.eventDate), start));
                     log.info("Time criteria added - only Start");
                 }
             } else {
@@ -96,8 +96,9 @@ public class EventSpecification {
 
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
             predicates.add(criteriaBuilder.equal(root.get(Event_.state), EventLifeState.PUBLISHED));
-            String text = findParameters.getText().trim().toLowerCase();
+            String text = findParameters.getText();
             if (!Objects.isNull(text) && text.length() > 0) {
+                text.trim().toLowerCase();
                 String pattern = "%" + text + "%";
                 predicates
                         .add(criteriaBuilder

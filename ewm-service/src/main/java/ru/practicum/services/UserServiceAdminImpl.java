@@ -36,6 +36,7 @@ public class UserServiceAdminImpl {
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());
         } else {
+            ids.forEach(this::checkUserExistence);
             for (Long id : ids) {
                 log.info("id={}", id);
             }

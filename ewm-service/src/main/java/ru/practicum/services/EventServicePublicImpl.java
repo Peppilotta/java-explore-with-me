@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.StatsClient;
+import ru.practicum.category.storage.CategoryRepository;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.EventFullDto;
@@ -38,13 +39,20 @@ public class EventServicePublicImpl implements EventServicePublic {
 
     private final EventRepository eventRepository;
     private final EventSpecification eventSpecification;
+
     private final RequestRepository requestRepository;
+
+    private final CategoryRepository categoryRepository;
+
     private final EventMapper eventMapper;
 
     private final StatsClient client;
 
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
         log.info("Get events with parameters Public");
+        if (!Objects.isNull(parameters.getCategories())) {
+            parameters.getCategories().forEach(this::checkCategoryExists);
+        }
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
         int start = (int) pageable.getOffset();
         int end;
@@ -70,10 +78,10 @@ public class EventServicePublicImpl implements EventServicePublic {
         if (eventsPageable.isEmpty()) {
             return new ArrayList<>();
         } else {
-            eventRepository.updateViewsByEvents(eventsPageable);
-            log.info("views for events updated");
 
             List<Event> eventsFoundedByParameters = eventRepository.findAllByEvents(eventsPageable);
+            eventRepository.updateViewsByEvents(eventsFoundedByParameters);
+            log.info("views for events updated");
 
             if (!Objects.isNull(parameters.getSort()) && SortEvent.existsByName(parameters.getSort())) {
                 SortEvent sort = SortEvent.valueOf(parameters.getSort());
@@ -99,6 +107,19 @@ public class EventServicePublicImpl implements EventServicePublic {
         eventRepository.updateViewsById(id);
         log.info("views for event with id={} updated", id);
         return eventMapper.toFullDto(event);
+    }
+
+    private void checkCategoryExists(Long catId) {
+        if (!categoryRepository.existsById(catId)) {
+            String message = "Category with id=" + catId + "  was not found";
+            ApiError apiError = ApiError.builder()
+                    .message(message)
+                    .reason("The required object was not found.")
+                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            throw new NotFoundException(apiError);
+        }
     }
 
     private void checkEventExists(Long id) {
