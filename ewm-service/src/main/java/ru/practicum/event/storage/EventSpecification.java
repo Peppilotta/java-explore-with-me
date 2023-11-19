@@ -54,7 +54,9 @@ public class EventSpecification {
                         .distinct(true)
                         .where(categoryRoot.get(Category_.id).in(categories));
                 predicates.add(criteriaBuilder.in(root.get(Event_.category)).value(categorySubQuery));
-                log.info("Categories criteria added");
+                StringBuilder categoriesToLog = new StringBuilder();
+                categories.forEach(c -> categoriesToLog.append(" id=").append(c));
+                log.info("Categories criteria added. {}", categoriesToLog);
             }
             List<String> states = findParameters.getStates();
             if (!states.isEmpty()) {
@@ -64,7 +66,9 @@ public class EventSpecification {
                     inStates.value(eventLifeState);
                 }
                 predicates.add(inStates);
-                log.info("States criteria added");
+                StringBuilder statesToLog = new StringBuilder();
+                states.forEach(c -> statesToLog.append(" state=").append(c));
+                log.info("States criteria added. {}", statesToLog);
             }
 
             LocalDateTime start = findParameters.getRangeStart();
@@ -92,13 +96,16 @@ public class EventSpecification {
 
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
             predicates.add(criteriaBuilder.equal(root.get(Event_.state), EventLifeState.PUBLISHED));
-            String text = findParameters.getText();
-            if (!Objects.isNull(text)) {
-                String pattern = ("%" + text + "%").toLowerCase();
-                predicates.add(criteriaBuilder.or(criteriaBuilder.like(root.get(Event_.annotation), pattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
+            String text = findParameters.getText().trim().toLowerCase();
+            if (!Objects.isNull(text) && text.length() > 0) {
+                String pattern = "%" + text + "%";
+                predicates
+                        .add(criteriaBuilder
+                                .or(
+                                        criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), pattern),
+                                        criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
 
-                log.info("Criteria added: text");
+                log.info("Criteria added: text = {}", text);
             }
             List<Long> categories = findParameters.getCategories();
             if (!Objects.isNull(categories) && !categories.isEmpty()) {
@@ -108,7 +115,9 @@ public class EventSpecification {
                         .distinct(true)
                         .where(categoryRoot.get(Category_.id).in(categories));
                 predicates.add(criteriaBuilder.in(root.get(Event_.category)).value(categorySubQuery));
-                log.info("Criteria added: categories");
+                StringBuilder categoriesToLog = new StringBuilder();
+                categories.forEach(c -> categoriesToLog.append(" id=").append(c));
+                log.info("Categories criteria added. {}", categoriesToLog);
             }
             Boolean paid = findParameters.getPaid();
             if (!Objects.isNull(paid)) {
