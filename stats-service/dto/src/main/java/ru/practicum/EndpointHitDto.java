@@ -31,7 +31,7 @@ public class EndpointHitDto {
 
     private String ip;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSZ")
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime timestamp;

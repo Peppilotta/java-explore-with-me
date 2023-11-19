@@ -20,6 +20,7 @@ import ru.practicum.event.dto.SortEvent;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.event.storage.EventSpecification;
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.RequestStatus;
 import ru.practicum.request.storage.RequestRepository;
@@ -50,9 +51,7 @@ public class EventServicePublicImpl implements EventServicePublic {
 
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
         log.info("Get events with parameters Public");
-        if (!Objects.isNull(parameters.getCategories())) {
-            parameters.getCategories().forEach(this::checkCategoryExists);
-        }
+        checkCategoriesInParameters(parameters.getCategories());
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
         int start = (int) pageable.getOffset();
         int end;
@@ -109,6 +108,21 @@ public class EventServicePublicImpl implements EventServicePublic {
         return eventMapper.toFullDto(event);
     }
 
+    private void checkCategoriesInParameters(List<Long> categories) {
+        if (!Objects.isNull(categories) && !categories.isEmpty()) {
+            ApiError apiError = ApiError.builder()
+                    .message("Bad categories parameter")
+                    .reason("Bad request parameters")
+                    .status(ErrorStatus.E_400_BAD_REQUEST.getValue())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            categories.forEach(u ->
+                    categoryRepository.findById(u).orElseThrow(() ->
+                            new BadRequestException(apiError)));
+        }
+    }
+
     private void checkCategoryExists(Long catId) {
         if (!categoryRepository.existsById(catId)) {
             String message = "Category with id=" + catId + "  was not found";
@@ -135,7 +149,6 @@ public class EventServicePublicImpl implements EventServicePublic {
     }
 
     private void checkEventPublished(EventLifeState state) {
-
         if (!Objects.equals(state, EventLifeState.PUBLISHED)) {
             ApiError apiError = ApiError.builder()
                     .message("Event not Published")

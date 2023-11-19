@@ -212,16 +212,32 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
         log.info("Request for list Events according parameters {}", parameters);
-        if (!Objects.isNull(parameters.getUsers())) {
-            parameters.getUsers().forEach(this::checkUserExistence);
-        }
-        if (!Objects.isNull(parameters.getCategories())) {
-            parameters.getCategories().forEach(this::checkCategoryExistence);
-        }
+        checkUsersInParameters(parameters.getUsers());
+        checkCategoriesInParameters(parameters.getCategories());
         return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
                 .stream()
                 .map(eventMapper::toFullDto)
                 .collect(Collectors.toList());
+    }
+
+    private void checkUsersInParameters(List<Long> users) {
+        if (!Objects.isNull(users) && !users.isEmpty()) {
+            apiErrorBadRequest.setMessage("Bad users parameter");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            users.forEach(u ->
+                    userRepository.findById(u).orElseThrow(() ->
+                            new BadRequestException(apiErrorBadRequest)));
+        }
+    }
+
+    private void checkCategoriesInParameters(List<Long> categories) {
+        if (!Objects.isNull(categories) && !categories.isEmpty()) {
+            apiErrorBadRequest.setMessage("Bad categories parameter");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            categories.forEach(u ->
+                    categoryRepository.findById(u).orElseThrow(() ->
+                            new BadRequestException(apiErrorBadRequest)));
+        }
     }
 
     public EventFullDto getEventByAdmin(Long eventId) {

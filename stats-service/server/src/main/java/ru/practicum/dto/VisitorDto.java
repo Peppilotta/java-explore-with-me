@@ -27,7 +27,7 @@ public class VisitorDto {
 
     private String ip;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss.SSSZ")
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime timestamp;

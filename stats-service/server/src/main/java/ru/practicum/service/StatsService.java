@@ -54,7 +54,7 @@ public class StatsService {
     }
 
     public List<VisitorsStatsDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
         LocalDateTime dateTimeStart = LocalDateTime.parse(start, formatter);
         LocalDateTime dateTimeEnd = LocalDateTime.parse(end, formatter);
         List<VisitorsStatsDto> stats = new ArrayList<>();

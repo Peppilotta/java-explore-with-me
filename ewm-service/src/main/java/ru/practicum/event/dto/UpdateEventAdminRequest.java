@@ -34,7 +34,7 @@ public class UpdateEventAdminRequest {
     private String description;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSZ")
     private LocalDateTime eventDate;
 
     private UserShortDto initiator;
