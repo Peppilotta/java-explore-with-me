@@ -2,11 +2,13 @@ package ru.practicum.controllers;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.services.interfaces.CategoryServicePublic;
@@ -27,6 +29,7 @@ public class CategoriesControllerPublic {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                            @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
@@ -34,6 +37,7 @@ public class CategoriesControllerPublic {
     }
 
     @GetMapping("/{catId}")
+    @ResponseStatus(HttpStatus.OK)
     public CategoryDto getCategory(@PathVariable(name = "catId") @Positive Long catId) {
         return service.getCategory(catId);
     }

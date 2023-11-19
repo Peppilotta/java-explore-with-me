@@ -2,11 +2,13 @@ package ru.practicum.controllers;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.services.interfaces.CompilationServicePublic;
@@ -27,6 +29,7 @@ public class CompilationsControllerPublic {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     List<CompilationDto> getCompilationsPageable(@RequestParam(defaultValue = "true") boolean pinned,
                                                  @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                  @RequestParam(defaultValue = "10") @Positive Integer size) {
@@ -36,6 +39,7 @@ public class CompilationsControllerPublic {
     }
 
     @GetMapping("/{compId}")
+    @ResponseStatus(HttpStatus.OK)
     CompilationDto getCompilation(@PathVariable(name = "compId") @Positive Long compId) {
         return compilationService.getCompilation(compId);
     }
