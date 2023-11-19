@@ -25,7 +25,7 @@ public class VisitorWithoutEndpoint {
 
     private String ip;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime timestamp;
