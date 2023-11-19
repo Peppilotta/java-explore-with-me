@@ -98,8 +98,7 @@ public class EventSpecification {
             predicates.add(criteriaBuilder.equal(root.get(Event_.state), EventLifeState.PUBLISHED));
             String text = findParameters.getText();
             if (!Objects.isNull(text) && text.length() > 0) {
-                text.trim().toLowerCase();
-                String pattern = "%" + text + "%";
+                String pattern = "%" + text.trim().toLowerCase() + "%";
                 predicates
                         .add(criteriaBuilder
                                 .or(
