@@ -324,8 +324,8 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     private void checkRequestStatus(Long id) {
-        if (requestRepository.existsById(id)) {
-            apiError.setMessage("Request with id={} does not exists");
+        if (!requestRepository.existsById(id)) {
+            apiError.setMessage("Request with id=" + id + " does not exists.");
             apiError.setTimestamp(LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
