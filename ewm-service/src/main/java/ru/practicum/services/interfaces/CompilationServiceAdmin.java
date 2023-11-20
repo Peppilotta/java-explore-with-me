@@ -2,7 +2,7 @@ package ru.practicum.services.interfaces;
 
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
-import ru.practicum.request.dto.UpdateCompilationRequest;
+import ru.practicum.compilation.dto.UpdateCompilationRequest;
 
 public interface CompilationServiceAdmin {
 

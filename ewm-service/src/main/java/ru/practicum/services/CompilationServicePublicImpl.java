@@ -38,7 +38,9 @@ public class CompilationServicePublicImpl implements CompilationServicePublic {
     public List<CompilationDto> getCompilations(Boolean pinned, Pageable pageable) {
         log.info("Get compilations public, pinned = {}", pinned);
 
-        return compilationRepository.getByPinned(pinned, pageable).getContent().stream()
+        return compilationRepository.getByPinned(pinned, pageable)
+                .getContent()
+                .stream()
                 .map(comp -> compilationMapper.toCompilationDto(comp, getEvents(comp.getId())))
                 .collect(Collectors.toList());
     }

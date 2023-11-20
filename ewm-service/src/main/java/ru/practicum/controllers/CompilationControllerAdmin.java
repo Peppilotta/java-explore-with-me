@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.services.interfaces.CompilationServiceAdmin;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
-import ru.practicum.request.dto.UpdateCompilationRequest;
+import ru.practicum.compilation.dto.UpdateCompilationRequest;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

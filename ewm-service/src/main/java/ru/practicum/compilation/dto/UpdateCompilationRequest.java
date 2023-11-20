@@ -1,4 +1,4 @@
-package ru.practicum.request.dto;
+package ru.practicum.compilation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +26,6 @@ public class UpdateCompilationRequest {
 
     private Boolean pinned;
 
-    @Size(min = 1, max = 50, message = "Size of title must be between {min} and {max}")
+    @Size(min = 1, max = 51, message = "Size of title must be between {min} and {max}")
     private String title;
 }
