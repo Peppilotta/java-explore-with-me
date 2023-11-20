@@ -222,6 +222,11 @@ public class EventServicePrivateAdminImpl implements EventService {
             }
         }
 
+        if (limitReached) {
+            List<Long> requestsForReject = requestRepository
+                    .findAllByEventIdAndStatus(eventId, RequestStatus.PENDING);
+            rejectedIds.addAll(requestsForReject);
+        }
         return new EventRequestStatusUpdateResult(
                 requestMapper.toDtos(changeStatusForRequests(confirmedIds, RequestStatus.CONFIRMED)),
                 requestMapper.toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED)));

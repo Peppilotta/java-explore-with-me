@@ -24,4 +24,8 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     @Query("select r from Request as r where r.id in :ids")
     List<Request> findAllByIds(@Param("ids") List<Long> ids);
+
+    @Query("select r.id from Request as r where r.event.id = :eventId and r.status = :status")
+    List<Long> findAllByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") RequestStatus status);
+
 }
