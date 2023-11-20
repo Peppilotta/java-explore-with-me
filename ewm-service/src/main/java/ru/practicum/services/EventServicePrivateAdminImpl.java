@@ -216,13 +216,14 @@ public class EventServicePrivateAdminImpl implements EventService {
             } else {
                 if (limitReached) {
                     rejectedIds.add(id);
+                } else {
+                    confirmedIds.add(id);
                 }
-                confirmedIds.add(id);
             }
         }
 
         return new EventRequestStatusUpdateResult(
-                requestMapper.toDtos(changeStatusForRequests(requestIds, RequestStatus.CONFIRMED)),
+                requestMapper.toDtos(changeStatusForRequests(confirmedIds, RequestStatus.CONFIRMED)),
                 requestMapper.toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED)));
     }
 
