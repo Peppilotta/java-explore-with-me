@@ -8,6 +8,7 @@ import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.EventLifeState;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.dto.RequestMapper;
@@ -109,7 +110,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         if (maxParticipants > 0 && Objects.equals(confirmed, maxParticipants)) {
             apiErrorConflict.setMessage("ParticipantLimit is reached");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
-            throw new NotFoundException(apiErrorConflict);
+            throw new ConflictException(apiErrorConflict);
         }
     }
 
@@ -117,7 +118,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         if (!requestRepository.findByUserIdAndEventId(userId, eventId).isEmpty()) {
             apiErrorConflict.setMessage("Repeat request from user with id=" + userId + " to event with id=" + eventId);
             apiErrorConflict.setTimestamp(LocalDateTime.now());
-            throw new NotFoundException(apiErrorConflict);
+            throw new ConflictException(apiErrorConflict);
         }
     }
 
@@ -125,7 +126,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         if (!Objects.equals(state, EventLifeState.PUBLISHED)) {
             apiErrorConflict.setMessage("Event not published yet.");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
-            throw new NotFoundException(apiErrorConflict);
+            throw new ConflictException(apiErrorConflict);
         }
     }
 
@@ -133,7 +134,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         if (Objects.equals(userId, initiatorId)) {
             apiErrorConflict.setMessage("Request to own event.");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
-            throw new NotFoundException(apiErrorConflict);
+            throw new ConflictException(apiErrorConflict);
         }
     }
 
