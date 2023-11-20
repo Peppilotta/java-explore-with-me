@@ -173,41 +173,63 @@ public class EventServicePrivateAdminImpl implements EventService {
                                                               EventRequestStatusUpdateRequest requestUpdates) {
         log.info("Update requests of participation from user with id={} for event with id={} and updates = {}",
                 userId, eventId, requestUpdates);
-        List<Long> requestIds = requestUpdates.getRequestIds();
-        if (Objects.isNull(requestIds)) {
-            return new EventRequestStatusUpdateResult();
-        }
         checkUserExistence(userId);
         checkEventExistence(eventId);
+
+        List<Long> requestIds = requestUpdates.getRequestIds();
+        RequestStatus newStatus = requestUpdates.getStatus();
+
+        if (Objects.isNull(requestIds)
+                || requestIds.isEmpty()
+                || !(Objects.equals(newStatus, RequestStatus.CONFIRMED)
+                || Objects.equals(newStatus, RequestStatus.REJECTED))) {
+            apiErrorBadRequest.setMessage("Wrong data for updates");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
+        }
+
+        requestIds.forEach(this::checkRequestStatus);
+
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         Long limit = Long.valueOf(event.getParticipantLimit());
-        if (limit == 0 || event.getRequestModeration().equals(false)) {
-            return new EventRequestStatusUpdateResult();
-        }
-        RequestStatus newStatus = requestUpdates.getStatus();
-        List<Request> requests = requestRepository.findAllByIds(requestIds);
-        List<Request> confirmedRequests = new ArrayList<>();
-        List<Request> rejectedRequests = new ArrayList<>();
 
-        for (Request request : requests) {
-            if (!Objects.equals(request.getStatus(), RequestStatus.PENDING)) {
-                checkRequestIntegrity("Only Pending request can be updated.");
-            }
-            Long confirmed = requestRepository
-                    .getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
-            if (Objects.equals(newStatus, RequestStatus.CONFIRMED)) {
-                if (limit < confirmed) {
-                    request.setStatus(RequestStatus.CONFIRMED);
-                    confirmedRequests.add(requestRepository.save(request));
-                }
+        if (limit == 0 && event.getRequestModeration().equals(false)) {
+            List<ParticipationRequestDto> dto = requestMapper
+                    .toDtos(changeStatusForRequests(requestIds, RequestStatus.CONFIRMED));
+            return new EventRequestStatusUpdateResult(dto, new ArrayList<>());
+        }
+        List<Long> confirmedIds = new ArrayList<>();
+        List<Long> rejectedIds = new ArrayList<>();
+
+        if (Objects.equals(newStatus, RequestStatus.REJECTED)) {
+            rejectedIds.addAll(requestIds);
+            List<ParticipationRequestDto> dto = requestMapper
+                    .toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED));
+            return new EventRequestStatusUpdateResult(new ArrayList<>(), dto);
+        }
+        boolean limitReached = false;
+        for (Long id : requestIds) {
+            Long confirmed = requestRepository.getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
+            if (Objects.equals(limit, confirmed)) {
+                confirmedIds.add(id);
+                limitReached = true;
             } else {
-                request.setStatus(newStatus);
-                rejectedRequests.add(requestRepository.save(request));
+                if (limitReached) {
+                    rejectedIds.add(id);
+                }
+                confirmedIds.add(id);
             }
         }
 
-        return new EventRequestStatusUpdateResult(requestMapper.toDtos(confirmedRequests),
-                requestMapper.toDtos(rejectedRequests));
+        return new EventRequestStatusUpdateResult(
+                requestMapper.toDtos(changeStatusForRequests(requestIds, RequestStatus.CONFIRMED)),
+                requestMapper.toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED)));
+    }
+
+    private List<Request> changeStatusForRequests(List<Long> requestIds, RequestStatus status) {
+        List<Request> requests = requestRepository.findAllByIds(requestIds);
+        requests.forEach(r -> r.setStatus(status));
+        return requestRepository.saveAll(requests);
     }
 
     public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
@@ -301,10 +323,17 @@ public class EventServicePrivateAdminImpl implements EventService {
         }
     }
 
-    private void checkRequestIntegrity(String message) {
-        apiErrorConflict.setMessage(message);
-        apiErrorConflict.setTimestamp(LocalDateTime.now());
-        throw new NotFoundException(apiErrorConflict);
+    private void checkRequestStatus(Long id) {
+        if (requestRepository.existsById(id)) {
+            apiError.setMessage("Request with id={} does not exists");
+            apiError.setTimestamp(LocalDateTime.now());
+            throw new NotFoundException(apiError);
+        }
+        if (!Objects.equals(requestRepository.findById(id).get().getStatus(), RequestStatus.PENDING)) {
+            apiErrorConflict.setMessage("Only Pending request can be updated.");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
+            throw new ConflictException(apiErrorConflict);
+        }
     }
 
     private void checkUserExistence(Long id) {

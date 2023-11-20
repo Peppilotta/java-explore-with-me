@@ -1,5 +1,7 @@
 package ru.practicum.event.dto;
 
+import java.util.Objects;
+
 public enum EventLifeState {
     PENDING("PENDING"),
     PUBLISHED("PUBLISHED"),
@@ -18,5 +20,14 @@ public enum EventLifeState {
     @Override
     public String toString() {
         return String.valueOf(value);
+    }
+
+    public static boolean existsByName(String state) {
+        for (EventLifeState lifeState : values()) {
+            if (Objects.equals(lifeState.name(), state)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

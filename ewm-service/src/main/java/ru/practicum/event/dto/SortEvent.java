@@ -12,15 +12,6 @@ public enum SortEvent {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
     public static boolean existsByName(String sort) {
         for (SortEvent sortEvent : values()) {
             if (Objects.equals(sortEvent.name(), sort)) {
@@ -30,4 +21,12 @@ public enum SortEvent {
         return false;
     }
 
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }
