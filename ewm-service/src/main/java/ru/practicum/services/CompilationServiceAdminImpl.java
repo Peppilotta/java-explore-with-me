@@ -7,6 +7,7 @@ import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.CompilationMapper;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.NewEventCompilationDto;
+import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.model.EventCompilation;
 import ru.practicum.compilation.storage.CompilationRepository;
@@ -17,7 +18,6 @@ import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.services.interfaces.CompilationServiceAdmin;
 
 import java.time.LocalDateTime;
@@ -72,12 +72,17 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         log.info("Request for updating Compilation with id = {} and Updates = {}", compId, compilationUpdate);
         checkCompilationExists(compId);
         Compilation compilation = compilationRepository.findById(compId).orElseGet(Compilation::new);
+
         String title = compilationUpdate.getTitle();
         if (!Objects.isNull(title)) {
             compilation.setTitle(title);
         }
-        compilation.setPinned(compilationUpdate.getPinned());
-        Compilation createdCompilation = compilationRepository.save(compilation);
+
+        boolean pinned = compilationUpdate.getPinned();
+        if (!Objects.isNull(pinned)) {
+            compilation.setPinned(pinned);
+        }
+
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
         List<Long> updatedEventIds = compilationUpdate.getEvents();
         if (!eventIds.isEmpty()) {
@@ -86,9 +91,10 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         List<Long> existedNewEventIds = updatedEventIds.stream()
                 .filter(eventRepository::existsById)
                 .collect(Collectors.toList());
+
         List<EventShortDto> newEvents = addEventToCompilation(existedNewEventIds, compId);
         newEvents.addAll(eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds)));
-        return compilationMapper.toCompilationDto(createdCompilation, newEvents);
+        return compilationMapper.toCompilationDto(compilationRepository.save(compilation), newEvents);
     }
 
     private List<EventShortDto> addEventToCompilation(List<Long> eventIds, Long id) {

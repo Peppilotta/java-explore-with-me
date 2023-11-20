@@ -53,47 +53,40 @@ public class EventServicePublicImpl implements EventServicePublic {
         log.info("Get events with parameters Public");
         checkCategoriesInParameters(parameters.getCategories());
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
-        int start = (int) pageable.getOffset();
-        int end;
-        List<Event> eventsPageable = new ArrayList<>();
-        List<Event> events = eventRepository.findAll(eventSpecification.getEventsByParametersPublic(parameters));
+        List<Event> events = eventRepository
+                .findAll(eventSpecification.getEventsByParametersPublic(parameters), pageable).getContent();
+        if (events.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Event> filtered = new ArrayList<>();
         if (Boolean.TRUE.equals(parameters.getOnlyAvailable())) {
-            List<Event> filtered = events.stream()
-                    .filter(e -> (e.getParticipantLimit() > 0)
+            filtered.addAll(events.stream()
+                    .filter(e -> ((e.getParticipantLimit() > 0)
                             && (e.getEventRequests().size()
-                            < requestRepository.getAllByEventIdAndStatus(e.getId(), RequestStatus.CONFIRMED)))
-                    .collect(Collectors.toList());
+                            < requestRepository.getAllByEventIdAndStatus(e.getId(), RequestStatus.CONFIRMED))
+                            || e.getParticipantLimit() == 0))
+                    .collect(Collectors.toList()));
             if (filtered.isEmpty()) {
                 return new ArrayList<>();
-            } else {
-                end = Math.min((start + pageable.getPageSize()), filtered.size());
-                eventsPageable.addAll(filtered.subList(start, end));
             }
         } else {
-            end = Math.min((start + pageable.getPageSize()), events.size());
-            eventsPageable.addAll(events.subList(start, end));
+            filtered.addAll(events);
         }
 
-        if (eventsPageable.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-
-            List<Event> eventsFoundedByParameters = eventRepository.findAllByEvents(eventsPageable);
-            eventRepository.updateViewsByEvents(eventsFoundedByParameters);
-            log.info("views for events updated");
-
-            if (!Objects.isNull(parameters.getSort()) && SortEvent.existsByName(parameters.getSort())) {
-                SortEvent sort = SortEvent.valueOf(parameters.getSort());
-                if (Objects.equals(sort, SortEvent.EVENT_DATE)) {
-                    eventsFoundedByParameters.sort(Comparator.comparing(Event::getEventDate));
-                }
-                if (Objects.equals(sort, SortEvent.VIEWS)) {
-                    eventsFoundedByParameters.sort(Comparator.comparing(Event::getViews));
-                }
+        eventRepository.updateViewsByEvents(filtered);
+        filtered.forEach(e -> e.setViews(e.getViews() + 1));
+        log.info("views for events updated");
+        if (!Objects.isNull(parameters.getSort()) && SortEvent.existsByName(parameters.getSort())) {
+            SortEvent sort = SortEvent.valueOf(parameters.getSort());
+            if (Objects.equals(sort, SortEvent.EVENT_DATE)) {
+                filtered.sort(Comparator.comparing(Event::getEventDate));
             }
-
-            return eventMapper.toShortDtos(eventsFoundedByParameters);
+            if (Objects.equals(sort, SortEvent.VIEWS)) {
+                filtered.sort(Comparator.comparing(Event::getViews));
+            }
         }
+
+        return eventMapper.toShortDtos(filtered);
     }
 
     public EventFullDto getEvent(PublicEventFindParameters parameters) {
@@ -104,6 +97,8 @@ public class EventServicePublicImpl implements EventServicePublic {
         checkEventPublished(event.getState());
         //сначала увеличивается число просмотров, затем сохраняется статистика
         eventRepository.updateViewsById(id);
+        Long viewsBefore = event.getViews();
+        event.setViews(viewsBefore + 1);
         saveStatistic(parameters.getPublicIp(), parameters.getUri());
         log.info("views for event with id={} updated", id);
         return eventMapper.toFullDto(event);
@@ -121,19 +116,6 @@ public class EventServicePublicImpl implements EventServicePublic {
             categories.forEach(u ->
                     categoryRepository.findById(u).orElseThrow(() ->
                             new BadRequestException(apiError)));
-        }
-    }
-
-    private void checkCategoryExists(Long catId) {
-        if (!categoryRepository.existsById(catId)) {
-            String message = "Category with id=" + catId + "  was not found";
-            ApiError apiError = ApiError.builder()
-                    .message(message)
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
-            throw new NotFoundException(apiError);
         }
     }
 
