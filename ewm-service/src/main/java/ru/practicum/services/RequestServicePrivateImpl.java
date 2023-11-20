@@ -42,6 +42,13 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
             .timestamp(LocalDateTime.now())
             .build();
 
+    private final ApiError apiErrorConflict = ApiError.builder()
+            .message("")
+            .reason("Integrity constraint has been violated.")
+            .status(ErrorStatus.E_409_CONFLICT.getValue())
+            .timestamp(LocalDateTime.now())
+            .build();
+
     public List<ParticipationRequestDto> getRequests(Long userId) {
         log.info("Get requests from user with id={} to events of other user ", userId);
         checkUserExistence(userId);
@@ -52,10 +59,15 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         log.info("Post new request from user with id={} to event with id={}", userId, eventId);
         checkUserExistence(userId);
         checkEventExistence(eventId);
-        Long confirmedRequests = requestRepository.getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        Integer confirmedRequests = requestRepository
+                .getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED)
+                .intValue();
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        checkEventAvailable(confirmedRequests, event, userId);
         Integer limit = event.getParticipantLimit();
+        checkParticipantReached(event.getParticipantLimit(), confirmedRequests);
+        checkRepeatRequest(userId, eventId);
+        checkEventPublished(event.getState());
+        checkEventIsOwn(userId, event.getInitiator().getId());
         RequestStatus status = RequestStatus.PENDING;
         if (limit == 0) {
             status = RequestStatus.CONFIRMED;
@@ -93,40 +105,34 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         }
     }
 
-    private void checkEventAvailable(Long confirmedRequests, Event event, Long userId) {
-        Integer maxParticipants = event.getParticipantLimit();
-        Long eventId = event.getId();
-        StringBuilder message = new StringBuilder();
-        ApiError apiErrorConflict = ApiError.builder()
-                .message("")
-                .reason("Integrity constraint has been violated.")
-                .status(ErrorStatus.E_409_CONFLICT.getValue())
-                .timestamp(LocalDateTime.now())
-                .build();
-        if (maxParticipants > 0 && Objects.equals(confirmedRequests, (long) maxParticipants)) {
-            message.append("ParticipantLimit is reached");
-            apiErrorConflict.setMessage(message.toString());
+    private void checkParticipantReached(Integer maxParticipants, Integer confirmed) {
+        if (maxParticipants > 0 && Objects.equals(confirmed, maxParticipants)) {
+            apiErrorConflict.setMessage("ParticipantLimit is reached");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
             throw new NotFoundException(apiErrorConflict);
         }
+    }
 
+    private void checkRepeatRequest(Long userId, Long eventId) {
         if (!requestRepository.findByUserIdAndEventId(userId, eventId).isEmpty()) {
-            message.append("Repeat request from user with id=")
-                    .append(userId)
-                    .append(" to event with id=")
-                    .append(event.getId());
-            apiErrorConflict.setMessage(message.toString());
+            apiErrorConflict.setMessage("Repeat request from user with id=" + userId + " to event with id=" + eventId);
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
             throw new NotFoundException(apiErrorConflict);
         }
+    }
 
-        if (!Objects.equals(event.getState(), EventLifeState.PUBLISHED)) {
-            message.append("Event not published yet.");
-            apiErrorConflict.setMessage(message.toString());
+    private void checkEventPublished(EventLifeState state) {
+        if (!Objects.equals(state, EventLifeState.PUBLISHED)) {
+            apiErrorConflict.setMessage("Event not published yet.");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
             throw new NotFoundException(apiErrorConflict);
         }
+    }
 
-        if (Objects.equals(userId, event.getInitiator().getId())) {
-            message.append("Request to own event.");
-            apiErrorConflict.setMessage(message.toString());
+    private void checkEventIsOwn(Long userId, Long initiatorId) {
+        if (Objects.equals(userId, initiatorId)) {
+            apiErrorConflict.setMessage("Request to own event.");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
             throw new NotFoundException(apiErrorConflict);
         }
     }
