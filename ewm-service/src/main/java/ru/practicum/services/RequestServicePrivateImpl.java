@@ -52,8 +52,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         log.info("Post new request from user with id={} to event with id={}", userId, eventId);
         checkUserExistence(userId);
         checkEventExistence(eventId);
-        Long confirmedRequests = requestRepository
-                .getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
+        Long confirmedRequests = requestRepository.getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventAvailable(confirmedRequests, event, userId);
         Integer limit = event.getParticipantLimit();
@@ -97,11 +96,17 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
     private void checkEventAvailable(Long confirmedRequests, Event event, Long userId) {
         Integer maxParticipants = event.getParticipantLimit();
         Long eventId = event.getId();
-        boolean conditionForConflict = false;
         StringBuilder message = new StringBuilder();
-        if (maxParticipants > 0 && confirmedRequests >= maxParticipants) {
+        ApiError apiErrorConflict = ApiError.builder()
+                .message("")
+                .reason("Integrity constraint has been violated.")
+                .status(ErrorStatus.E_409_CONFLICT.getValue())
+                .timestamp(LocalDateTime.now())
+                .build();
+        if (maxParticipants > 0 && Objects.equals(confirmedRequests, (long) maxParticipants)) {
             message.append("ParticipantLimit is reached");
-            conditionForConflict = true;
+            apiErrorConflict.setMessage(message.toString());
+            throw new NotFoundException(apiErrorConflict);
         }
 
         if (!requestRepository.findByUserIdAndEventId(userId, eventId).isEmpty()) {
@@ -109,26 +114,19 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
                     .append(userId)
                     .append(" to event with id=")
                     .append(event.getId());
-            conditionForConflict = true;
+            apiErrorConflict.setMessage(message.toString());
+            throw new NotFoundException(apiErrorConflict);
         }
 
         if (!Objects.equals(event.getState(), EventLifeState.PUBLISHED)) {
             message.append("Event not published yet.");
-            conditionForConflict = true;
+            apiErrorConflict.setMessage(message.toString());
+            throw new NotFoundException(apiErrorConflict);
         }
 
         if (Objects.equals(userId, event.getInitiator().getId())) {
             message.append("Request to own event.");
-            conditionForConflict = true;
-        }
-        if (conditionForConflict) {
-
-            ApiError apiErrorConflict = ApiError.builder()
-                    .message(message.toString())
-                    .reason("Integrity constraint has been violated.")
-                    .status(ErrorStatus.E_409_CONFLICT.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            apiErrorConflict.setMessage(message.toString());
             throw new NotFoundException(apiErrorConflict);
         }
     }

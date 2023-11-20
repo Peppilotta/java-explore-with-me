@@ -61,7 +61,7 @@ public class EventServicePublicImpl implements EventServicePublic {
             List<Event> filtered = events.stream()
                     .filter(e -> (e.getParticipantLimit() > 0)
                             && (e.getEventRequests().size()
-                            < requestRepository.getConfirmedRequestsForEventWithId(e.getId(), RequestStatus.CONFIRMED)))
+                            < requestRepository.getAllByEventIdAndStatus(e.getId(), RequestStatus.CONFIRMED)))
                     .collect(Collectors.toList());
             if (filtered.isEmpty()) {
                 return new ArrayList<>();

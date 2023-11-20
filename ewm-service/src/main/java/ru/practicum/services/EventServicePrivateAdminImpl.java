@@ -192,6 +192,7 @@ public class EventServicePrivateAdminImpl implements EventService {
 
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         Long limit = Long.valueOf(event.getParticipantLimit());
+        Long confirmed = requestRepository.getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
         if (limit == 0 && event.getRequestModeration().equals(false)) {
             List<ParticipationRequestDto> dto = requestMapper
@@ -207,11 +208,16 @@ public class EventServicePrivateAdminImpl implements EventService {
                     .toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED));
             return new EventRequestStatusUpdateResult(new ArrayList<>(), dto);
         }
-        boolean limitReached = false;
+        boolean limitReached = Objects.equals(limit, confirmed);
+        if (limitReached) {
+            apiErrorConflict.setMessage("Limit reached yet");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
+            throw new ConflictException(apiErrorConflict);
+        }
         for (Long id : requestIds) {
-            Long confirmed = requestRepository.getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
-            if (Objects.equals(limit, confirmed)) {
-                confirmedIds.add(id);
+            Long confirmedBefore = requestRepository.getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+            if (Objects.equals(limit, confirmedBefore)) {
+                rejectedIds.add(id);
                 limitReached = true;
             } else {
                 if (limitReached) {

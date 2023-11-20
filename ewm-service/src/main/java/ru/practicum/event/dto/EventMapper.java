@@ -49,7 +49,7 @@ public class EventMapper {
     public EventShortDto toShortDto(Event event) {
         Long eventId = event.getId();
         Long confirmedRequests = requestRepository
-                .getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
+                .getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
         return EventShortDto.builder()
                 .id(eventId)
                 .annotation(event.getAnnotation())
@@ -75,7 +75,7 @@ public class EventMapper {
     public EventFullDto toFullDto(Event event) {
         Long eventId = event.getId();
         Long confirmedRequests = requestRepository
-                .getConfirmedRequestsForEventWithId(eventId, RequestStatus.CONFIRMED);
+                .getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
         return EventFullDto.builder()
                 .id(eventId)
                 .annotation(event.getAnnotation())

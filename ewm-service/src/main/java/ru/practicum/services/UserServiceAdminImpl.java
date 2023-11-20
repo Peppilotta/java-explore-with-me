@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
-import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
@@ -37,6 +36,7 @@ public class UserServiceAdminImpl {
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());
         } else {
+/*
             ApiError apiError = ApiError.builder()
                     .message("Users in parameters not exists.")
                     .reason("Bad data in request.")
@@ -45,10 +45,13 @@ public class UserServiceAdminImpl {
                     .build();
 
             ids.forEach(u -> userRepository.findById(u).orElseThrow(() -> new BadRequestException(apiError)));
+*/
             for (Long id : ids) {
                 log.info("id={}", id);
             }
-            return userRepository.findAllByIds(ids, pageable).stream()
+            return userRepository.findAllByIds(ids, pageable)
+                    .getContent()
+                    .stream()
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());
         }
