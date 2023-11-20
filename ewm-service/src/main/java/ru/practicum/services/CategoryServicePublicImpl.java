@@ -5,17 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.category.dto.CategoryMapper;
+import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
-import ru.practicum.category.dto.CategoryMapper;
-import ru.practicum.category.model.Category;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.services.interfaces.CategoryServicePublic;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -28,9 +27,7 @@ public class CategoryServicePublicImpl implements CategoryServicePublic {
 
     public List<CategoryDto> getCategories(Pageable pageable) {
         log.info("Get Categories Public");
-        return categoryRepository.findAllOrderById().stream()
-                .map(categoryMapper::toDto)
-                .collect(Collectors.toList());
+        return categoryRepository.findAllPageable(pageable).getContent();
     }
 
     public CategoryDto getCategory(Long catId) {

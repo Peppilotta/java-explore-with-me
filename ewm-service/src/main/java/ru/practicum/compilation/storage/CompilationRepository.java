@@ -10,5 +10,5 @@ import ru.practicum.compilation.model.Compilation;
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
     @Query("select co from Compilation co where co.pinned = :pinned")
-    Page<Compilation> getCompilationsByPinned(@Param("pinned") boolean pinned, Pageable pageable);
+    Page<Compilation> getByPinned(@Param("pinned") boolean pinned, Pageable pageable);
 }

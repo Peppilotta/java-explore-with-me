@@ -102,8 +102,9 @@ public class EventServicePublicImpl implements EventServicePublic {
         checkEventExists(id);
         Event event = eventRepository.findById(id).orElseGet(Event::new);
         checkEventPublished(event.getState());
-        saveStatistic(parameters.getPublicIp(), parameters.getUri());
+        //сначала увеличивается число просмотров, затем сохраняется статистика
         eventRepository.updateViewsById(id);
+        saveStatistic(parameters.getPublicIp(), parameters.getUri());
         log.info("views for event with id={} updated", id);
         return eventMapper.toFullDto(event);
     }

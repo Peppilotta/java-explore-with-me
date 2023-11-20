@@ -367,9 +367,9 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     private void checkEventStatus(EventLifeState state) {
         if (Objects.equals(state, EventLifeState.PUBLISHED)) {
-            apiErrorBadRequest.setMessage("Event must not be published");
-            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
-            throw new BadRequestException(apiErrorBadRequest);
+            apiErrorConflict.setMessage("Event must not be published");
+            apiErrorConflict.setTimestamp(LocalDateTime.now());
+            throw new ConflictException(apiErrorBadRequest);
         }
     }
 

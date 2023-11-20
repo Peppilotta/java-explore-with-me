@@ -2,25 +2,23 @@ package ru.practicum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.compilation.dto.CompilationDto;
+import ru.practicum.compilation.dto.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.storage.CompilationRepository;
 import ru.practicum.compilation.storage.EventCompilationRepository;
+import ru.practicum.error.ApiError;
+import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
-import ru.practicum.compilation.dto.CompilationMapper;
-import ru.practicum.error.ApiError;
-import ru.practicum.error.ErrorStatus;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.services.interfaces.CompilationServicePublic;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,12 +38,9 @@ public class CompilationServicePublicImpl implements CompilationServicePublic {
     public List<CompilationDto> getCompilations(Boolean pinned, Pageable pageable) {
         log.info("Get compilations public, pinned = {}", pinned);
 
-        Page<Compilation> compilations = compilationRepository.getCompilationsByPinned(pinned, pageable);
-        List<CompilationDto> compilationDtos = new ArrayList<>();
-        for (Compilation comp : compilations) {
-            compilationDtos.add(compilationMapper.toCompilationDto(comp, getEvents(comp.getId())));
-        }
-        return compilationDtos;
+        return compilationRepository.getByPinned(pinned, pageable).getContent().stream()
+                .map(comp -> compilationMapper.toCompilationDto(comp, getEvents(comp.getId())))
+                .collect(Collectors.toList());
     }
 
     public CompilationDto getCompilation(Long compId) {
