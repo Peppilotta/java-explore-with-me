@@ -31,9 +31,8 @@ public class StatsService {
 
     public EndpointHitDto addHit(EndpointHitDto endpointHitDto) {
         String uri = endpointHitDto.getUri();
-        log.info("uri = {}", uri);
         String app = endpointHitDto.getApp();
-        log.info("app = {}", app);
+        log.info("app = {}, uri = {}", app, uri);
         EndpointWithoutVisitors endpoint;
         boolean endpointExists = endpointRepository.existsByUriAndApp(uri, app);
         log.info("endpointExists = {}", endpointExists);
