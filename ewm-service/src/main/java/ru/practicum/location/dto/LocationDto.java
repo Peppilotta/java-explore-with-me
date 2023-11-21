@@ -17,8 +17,6 @@ import lombok.ToString;
 @Builder(toBuilder = true)
 public class LocationDto {
 
-    //Широта и долгота места проведения события
-
     private Float lat;
 
     private Float lon;

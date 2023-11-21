@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class ParticipationRequestDto {
-    //Заявка на участие в событии
 
     @NotNull
     @Positive

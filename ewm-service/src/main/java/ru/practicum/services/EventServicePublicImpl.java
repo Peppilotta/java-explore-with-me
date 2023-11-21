@@ -52,7 +52,6 @@ public class EventServicePublicImpl implements EventServicePublic {
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
         log.info("Get events with parameters Public");
         checkCategoriesInParameters(parameters.getCategories());
-        saveStatistic(parameters.getPublicIp(), parameters.getUri());
         List<Event> events = eventRepository
                 .findAll(eventSpecification.getEventsByParametersPublic(parameters), pageable).getContent();
         if (events.isEmpty()) {
@@ -73,8 +72,10 @@ public class EventServicePublicImpl implements EventServicePublic {
             filtered.addAll(events);
         }
 
-        eventRepository.updateViewsByEvents(filtered);
-        filtered.forEach(e -> e.setViews(e.getViews() + 1));
+        Long visitsWithIp = saveStatistic(parameters.getPublicIp(), parameters.getUri());
+        if (visitsWithIp == 0) {
+            eventRepository.updateViewsByEvents(filtered);
+        }
         log.info("views for events updated");
         if (!Objects.isNull(parameters.getSort()) && SortEvent.existsByName(parameters.getSort())) {
             SortEvent sort = SortEvent.valueOf(parameters.getSort());
@@ -96,12 +97,12 @@ public class EventServicePublicImpl implements EventServicePublic {
         checkEventExists(id);
         Event event = eventRepository.findById(id).orElseGet(Event::new);
         checkEventPublished(event.getState());
-        //сначала увеличивается число просмотров, затем сохраняется статистика
-        eventRepository.updateViewsById(id);
-        Long viewsBefore = event.getViews();
-        event.setViews(viewsBefore + 1);
-        saveStatistic(parameters.getPublicIp(), parameters.getUri());
-        log.info("views for event with id={} updated", id);
+        Long visitsWithIp = saveStatistic(parameters.getPublicIp(), parameters.getUri());
+        if (visitsWithIp == 0) {
+            eventRepository.updateViewsById(id);
+            log.info("views for event with id={} updated", id);
+        }
+
         return eventMapper.toFullDto(event);
     }
 
@@ -144,17 +145,18 @@ public class EventServicePublicImpl implements EventServicePublic {
         }
     }
 
-    private void saveStatistic(String publicIp, String uri) {
+    private Long saveStatistic(String publicIp, String uri) {
         String app = "ewm_service";
-        if (client.getVisitorsIp(app, uri, publicIp) == 0) {
-            EndpointHitDto hit = EndpointHitDto.builder()
-                    .app(app)
-                    .timestamp(LocalDateTime.now())
-                    .uri(uri)
-                    .ip(publicIp)
-                    .build();
-            EndpointHitDto response = client.postHit(hit);
-            log.info("Statistic saved. Hit = {}", response);
-        }
+        Long visitWithIp = client.getVisitorsIp(app, uri, publicIp);
+        log.info("ip={}, count={}", publicIp, visitWithIp);
+        EndpointHitDto hit = EndpointHitDto.builder()
+                .app(app)
+                .timestamp(LocalDateTime.now())
+                .uri(uri)
+                .ip(publicIp)
+                .build();
+        EndpointHitDto response = client.postHit(hit);
+        log.info("Statistic saved. Hit = {}", response);
+        return visitWithIp;
     }
 }

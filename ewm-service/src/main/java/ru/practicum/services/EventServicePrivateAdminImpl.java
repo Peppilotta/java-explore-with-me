@@ -91,6 +91,7 @@ public class EventServicePrivateAdminImpl implements EventService {
             .timestamp(LocalDateTime.now())
             .build();
 
+    @Override
     public List<EventShortDto> getEvents(Long userId, Pageable pageable) {
         log.info("Get events of user with id={}", userId);
         checkUserExistence(userId);
@@ -100,6 +101,7 @@ public class EventServicePrivateAdminImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public EventFullDto addEvent(Long userId, NewEventDto event) {
         log.info("Create event from user with id={}. Event = {}", userId, event);
         checkEventTime(event.getEventDate());
@@ -119,6 +121,7 @@ public class EventServicePrivateAdminImpl implements EventService {
                 category)));
     }
 
+    @Override
     public EventFullDto getEvent(Long userId, Long eventId) {
         log.info("Get request for events of user with id={}", userId);
         checkUserExistence(userId);
@@ -128,6 +131,7 @@ public class EventServicePrivateAdminImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
+    @Override
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventUpdate) {
         log.info("Update request of user with id={} for event with id={} and updates = {}",
                 userId, eventId, eventUpdate);
@@ -161,6 +165,7 @@ public class EventServicePrivateAdminImpl implements EventService {
         return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));
     }
 
+    @Override
     public List<ParticipationRequestDto> getRequestsForParticipation(Long userId, Long eventId) {
         log.info("Request of participation from user with id={} for event with id={}", userId, eventId);
         checkUserExistence(userId);
@@ -168,6 +173,7 @@ public class EventServicePrivateAdminImpl implements EventService {
         return requestMapper.toDtos(requestRepository.findByOwnerIdAndEventId(userId, eventId));
     }
 
+    @Override
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId,
                                                               Long eventId,
                                                               EventRequestStatusUpdateRequest requestUpdates) {
@@ -179,16 +185,7 @@ public class EventServicePrivateAdminImpl implements EventService {
         List<Long> requestIds = requestUpdates.getRequestIds();
         RequestStatus newStatus = requestUpdates.getStatus();
 
-        if (Objects.isNull(requestIds)
-                || requestIds.isEmpty()
-                || !(Objects.equals(newStatus, RequestStatus.CONFIRMED)
-                || Objects.equals(newStatus, RequestStatus.REJECTED))) {
-            apiErrorBadRequest.setMessage("Wrong data for updates");
-            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
-            throw new BadRequestException(apiErrorBadRequest);
-        }
-
-        requestIds.forEach(this::checkRequestStatus);
+        checkUpdates(requestIds, newStatus);
 
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         Long limit = Long.valueOf(event.getParticipantLimit());
@@ -237,12 +234,7 @@ public class EventServicePrivateAdminImpl implements EventService {
                 requestMapper.toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED)));
     }
 
-    private List<Request> changeStatusForRequests(List<Long> requestIds, RequestStatus status) {
-        List<Request> requests = requestRepository.findAllByIds(requestIds);
-        requests.forEach(r -> r.setStatus(status));
-        return requestRepository.saveAll(requests);
-    }
-
+    @Override
     public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
         log.info("Request for list Events according parameters {}", parameters);
         checkUsersInParameters(parameters.getUsers());
@@ -253,11 +245,13 @@ public class EventServicePrivateAdminImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public EventFullDto getEventByAdmin(Long eventId) {
         checkEventExistence(eventId);
         return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
     }
 
+    @Override
     public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
         log.info("Update event with id={} by admin. Updates = {}", eventId, updatedEvent);
         checkEventExistence(eventId);
@@ -286,6 +280,24 @@ public class EventServicePrivateAdminImpl implements EventService {
             eventForSave.setPublishedOn(LocalDateTime.now());
         }
         return eventMapper.toFullDto(eventRepository.save(eventForSave));
+    }
+
+    private List<Request> changeStatusForRequests(List<Long> requestIds, RequestStatus status) {
+        List<Request> requests = requestRepository.findAllByIds(requestIds);
+        requests.forEach(r -> r.setStatus(status));
+        return requestRepository.saveAll(requests);
+    }
+
+    private void checkUpdates(List<Long> requestIds, RequestStatus newStatus) {
+        if (Objects.isNull(requestIds)
+                || requestIds.isEmpty()
+                || !(Objects.equals(newStatus, RequestStatus.CONFIRMED)
+                || Objects.equals(newStatus, RequestStatus.REJECTED))) {
+            apiErrorBadRequest.setMessage("Wrong data for updates");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
+        }
+        requestIds.forEach(this::checkRequestStatus);
     }
 
     private void checkUsersInParameters(List<Long> users) {

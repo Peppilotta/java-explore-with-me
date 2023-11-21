@@ -37,6 +37,7 @@ public class CompilationServicePublicImpl implements CompilationServicePublic {
 
     private final CompilationMapper compilationMapper;
 
+    @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Pageable pageable) {
         log.info("Get compilations public, pinned = {}", pinned);
 
@@ -47,6 +48,7 @@ public class CompilationServicePublicImpl implements CompilationServicePublic {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public CompilationDto getCompilation(Long compId) {
         log.info("Get compilation public, compId = {}", compId);
         checkCompilationExists(compId);

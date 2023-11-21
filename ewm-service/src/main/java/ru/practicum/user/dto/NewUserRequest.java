@@ -24,12 +24,12 @@ public class NewUserRequest {
 
     @NotNull(message = "Field: name. Error: must not be blank. Value: null")
     @NotBlank(message = "Field: name. Error: must not be blank. Value: empty")
-    @Size(min = 2, max = 250, message = "Size of '${validatedValue}' must be between {min} and {max}")
+    @Size(min = 2, max = 250, message = "Size of name must be between {min} and {max}")
     private String name;
 
     @NotNull(message = "Field: email. Error: must not be blank. Value: null")
     @Email
     @NotBlank
-    @Size(min = 6, max = 254, message = "Size of '${validatedValue}' must be between {min) and {max}")
+    @Size(min = 6, max = 254, message = "Size of email must be between {min} and {max}")
     private String email;
 }

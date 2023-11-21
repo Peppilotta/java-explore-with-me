@@ -36,16 +36,6 @@ public class UserServiceAdminImpl {
                     .map(userMapper::toDto)
                     .collect(Collectors.toList());
         } else {
-/*
-            ApiError apiError = ApiError.builder()
-                    .message("Users in parameters not exists.")
-                    .reason("Bad data in request.")
-                    .status(ErrorStatus.E_400_BAD_REQUEST.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            ids.forEach(u -> userRepository.findById(u).orElseThrow(() -> new BadRequestException(apiError)));
-*/
             for (Long id : ids) {
                 log.info("id={}", id);
             }

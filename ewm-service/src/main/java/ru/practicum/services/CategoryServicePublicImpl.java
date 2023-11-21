@@ -25,11 +25,13 @@ public class CategoryServicePublicImpl implements CategoryServicePublic {
 
     private final CategoryMapper categoryMapper;
 
+    @Override
     public List<CategoryDto> getCategories(Pageable pageable) {
         log.info("Get Categories Public");
         return categoryRepository.findAllPageable(pageable).getContent();
     }
 
+    @Override
     public CategoryDto getCategory(Long catId) {
         log.info("Get Category Public with id={}", catId);
         checkCategoryExists(catId);
@@ -38,9 +40,8 @@ public class CategoryServicePublicImpl implements CategoryServicePublic {
 
     private void checkCategoryExists(Long catId) {
         if (!categoryRepository.existsById(catId)) {
-            String message = "Category with id=" + catId + "  was not found";
             ApiError apiError = ApiError.builder()
-                    .message(message)
+                    .message("Category with id=" + catId + "  was not found")
                     .reason("The required object was not found.")
                     .status(ErrorStatus.E_404_NOT_FOUND.getValue())
                     .timestamp(LocalDateTime.now())

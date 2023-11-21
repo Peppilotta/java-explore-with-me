@@ -21,7 +21,6 @@ import javax.validation.constraints.Positive;
 @Builder(toBuilder = true)
 public class UserShortDto {
 
-
     @NotNull
     @Positive
     private Long id;

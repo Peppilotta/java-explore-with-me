@@ -30,12 +30,14 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
 
     private final EventRepository eventRepository;
 
+    @Override
     public CategoryDto addCategory(NewCategoryDto newCategory) {
         log.info("Request for creating Category = {}", newCategory);
         checkCategoryNameUnique(newCategory.getName(), 0L);
         return categoryMapper.toDto(categoryRepository.save(categoryMapper.toCategory(newCategory)));
     }
 
+    @Override
     public CategoryDto editCategory(Long catId, NewCategoryDto category) {
         log.info("Request for updating Category with id = {}", catId);
         checkCategoryExists(catId);
@@ -46,6 +48,7 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
         return categoryMapper.toDto(categoryRepository.save(updatedCategory));
     }
 
+    @Override
     public CategoryDto deleteCategory(Long catId) {
         log.info("Request for deleting Category with id = {}", catId);
         checkCategoryExists(catId);
@@ -56,6 +59,7 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
         return categoryMapper.toDto(deletedCategory);
     }
 
+    @Override
     public CategoryDto getCategory(Long catId) {
         log.info("Request for get Category with id = {}", catId);
         checkCategoryExists(catId);
@@ -64,6 +68,7 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
         return categoryMapper.toDto(category);
     }
 
+    @Override
     public List<CategoryDto> getCategories() {
         log.info("Request for all categories");
         return categoryMapper.toDtos(categoryRepository.findAllOrderById());

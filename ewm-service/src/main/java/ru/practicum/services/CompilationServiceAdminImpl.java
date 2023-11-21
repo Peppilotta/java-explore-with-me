@@ -42,6 +42,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
 
     private final EventMapper eventMapper;
 
+    @Override
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
         log.info("Request for creating Compilation = {}", compilationDto);
         checkName(compilationDto.getTitle());
@@ -55,6 +56,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         return compilationMapper.toCompilationDto(createdCompilation, events);
     }
 
+    @Override
     public CompilationDto deleteCompilation(Long compId) {
         log.info("Request for deleting Compilation with id = {}", compId);
         checkCompilationExists(compId);
@@ -69,6 +71,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
                 compilationRepository.findById(compId).orElseGet(Compilation::new), events);
     }
 
+    @Override
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest compilationUpdate) {
         log.info("Request for updating Compilation with id = {} and Updates = {}", compId, compilationUpdate);
         checkCompilationExists(compId);

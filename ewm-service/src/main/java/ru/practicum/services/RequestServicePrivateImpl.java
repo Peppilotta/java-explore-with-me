@@ -50,12 +50,14 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
             .timestamp(LocalDateTime.now())
             .build();
 
+    @Override
     public List<ParticipationRequestDto> getRequests(Long userId) {
         log.info("Get requests from user with id={} to events of other user ", userId);
         checkUserExistence(userId);
         return requestMapper.toDtos(requestRepository.findByUserId(userId));
     }
 
+    @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         log.info("Post new request from user with id={} to event with id={}", userId, eventId);
         checkUserExistence(userId);
@@ -87,6 +89,7 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
         return requestMapper.toDto(requestRepository.save(request));
     }
 
+    @Override
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         log.info("Post Cancel to request from user with id={} to request with id={}", userId, requestId);
         checkUserExistence(userId);
