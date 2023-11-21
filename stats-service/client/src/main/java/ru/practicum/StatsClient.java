@@ -1,33 +1,25 @@
 package ru.practicum;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Map;
+        import java.util.List;
 
-@Component
-public class StatsClient extends BaseStatsClient {
+@FeignClient(value = "statsClient", url = "${EWM_SERVER_URL}")
+public interface StatsClient {
 
-    @Autowired
-    public StatsClient(@Value("${STATS_SERVER_URL}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
-    }
+    @PostMapping(path = "/hit")
+    EndpointHitDto postHit(@RequestBody EndpointHitDto endpointHitDto);
 
-    public ResponseEntity<Object> postHit(EndpointHitDto endpointHitDto) {
-        return post("/hit", endpointHitDto);
-    }
+    @GetMapping("/stats")
+    List<VisitorsStatsDto> getStat(@RequestParam String start,
+                                           @RequestParam String end,
+                                           @RequestParam(required = false) List<String> uris,
+                                           @RequestParam(required = false, defaultValue = "false") Boolean unique);
 
-    public ResponseEntity<Object> getStat(Map<String, Object> parameters) {
-        return get("/stats", parameters);
-    }
+    @GetMapping("/visitors")
+    Long getVisitorsIp(@RequestParam String app, @RequestParam String uri, @RequestParam String ip);
 }

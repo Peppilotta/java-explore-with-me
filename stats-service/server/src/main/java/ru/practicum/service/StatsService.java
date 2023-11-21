@@ -69,4 +69,8 @@ public class StatsService {
         }
         return stats;
     }
+
+    public Long getVisitorsIp(String app, String uri, String ip) {
+        return endpointRepository.getUniqueIp(app, uri, ip);
+    }
 }

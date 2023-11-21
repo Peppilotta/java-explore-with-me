@@ -340,7 +340,7 @@ public class EventServicePrivateAdminImpl implements EventService {
             apiError.setTimestamp(LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
-        if (!Objects.equals(requestRepository.findById(id).get().getStatus(), RequestStatus.PENDING)) {
+        if (!Objects.equals(requestRepository.findById(id).orElseGet(Request::new).getStatus(), RequestStatus.PENDING)) {
             apiErrorConflict.setMessage("Only Pending request can be updated.");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
             throw new ConflictException(apiErrorConflict);

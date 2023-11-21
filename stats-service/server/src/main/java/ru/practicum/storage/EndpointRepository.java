@@ -3,6 +3,7 @@ package ru.practicum.storage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.VisitorsStatsDto;
 import ru.practicum.dto.EndpointWithoutVisitors;
@@ -55,4 +56,10 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long>, JpaSp
             "group by e.app, e.uri " +
             "order by count(distinct v.ip) desc ")
     List<VisitorsStatsDto> getAllUniqueUrisFromList(LocalDateTime start, LocalDateTime end);
+
+    @Query("select count(distinct v.ip)  " +
+            "from Endpoint as e " +
+            "inner join e.visitors v " +
+            "where e.app = :app and e.uri = :uri and v.ip = :visitorIp ")
+    Long getUniqueIp(@Param("app") String app, @Param("uri") String uri, @Param("visitorIp") String visitorIp);
 }

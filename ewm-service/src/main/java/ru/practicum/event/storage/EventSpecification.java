@@ -74,15 +74,11 @@ public class EventSpecification {
             LocalDateTime start = findParameters.getRangeStart();
             LocalDateTime end = findParameters.getRangeEnd();
             if (Objects.isNull(end)) {
-                if (!Objects.isNull(start)) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(Event_.eventDate), start));
-                    log.info("Time criteria added - only Start");
-                }
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(Event_.eventDate), start));
+                log.info("Time criteria added - only Start");
             } else {
-                if (!Objects.isNull(start)) {
-                    predicates.add(criteriaBuilder.between(root.get(Event_.eventDate), start, end));
-                    log.info("Time criteria added - start and end");
-                }
+                predicates.add(criteriaBuilder.between(root.get(Event_.eventDate), start, end));
+                log.info("Time criteria added - start and end");
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -102,11 +98,9 @@ public class EventSpecification {
                 if (modified.length() > 0) {
                     String pattern = "%" + modified.toLowerCase() + "%";
                     predicates
-                            .add(criteriaBuilder
-                                    .or(
-                                            criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), pattern),
-                                            criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
-
+                            .add(criteriaBuilder.or(
+                                    criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), pattern),
+                                    criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
                     log.info("Criteria added: text = {}", text);
                 }
             }
@@ -130,15 +124,11 @@ public class EventSpecification {
             LocalDateTime start = findParameters.getRangeStart();
             LocalDateTime end = findParameters.getRangeEnd();
             if (Objects.isNull(end)) {
-                if (!Objects.isNull(start)) {
-                    predicates.add(criteriaBuilder.greaterThan(root.get(Event_.eventDate), start));
-                    log.info("Time criteria added - only Start");
-                }
+                predicates.add(criteriaBuilder.greaterThan(root.get(Event_.eventDate), start));
+                log.info("Time criteria added - only Start");
             } else {
-                if (!Objects.isNull(start)) {
-                    predicates.add(criteriaBuilder.between(root.get(Event_.eventDate), start, end));
-                    log.info("Time criteria added - start and end");
-                }
+                predicates.add(criteriaBuilder.between(root.get(Event_.eventDate), start, end));
+                log.info("Time criteria added - start and end");
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

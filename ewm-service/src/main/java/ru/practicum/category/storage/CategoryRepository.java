@@ -30,5 +30,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Transactional
     @Modifying
     @Query("delete from Category as c where c.id = :id")
-    void deleteById(@Param("id") Long id);
+    void deleteById(@Param("id") @Nullable Long id);
 }

@@ -68,10 +68,6 @@ public class EventMapper {
         return events.stream().map(this::toShortDto).collect(Collectors.toList());
     }
 
-    public List<EventFullDto> toFullDtos(List<Event> events) {
-        return events.stream().map(this::toFullDto).collect(Collectors.toList());
-    }
-
     public EventFullDto toFullDto(Event event) {
         Long eventId = event.getId();
         Long confirmedRequests = requestRepository

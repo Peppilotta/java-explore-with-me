@@ -35,4 +35,9 @@ public class StatsController {
                                            @RequestParam(defaultValue = "false") Boolean unique) {
         return statsService.getStatistic(start, end, uris, unique);
     }
+
+    @GetMapping("/visitors")
+    Long getVisitorsIp(@RequestParam String app, @RequestParam String uri, String ip) {
+        return statsService.getVisitorsIp(app, uri, ip);
+    }
 }

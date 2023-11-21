@@ -44,7 +44,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
 
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
         log.info("Request for creating Compilation = {}", compilationDto);
-checkName(compilationDto.getTitle());
+        checkName(compilationDto.getTitle());
         Compilation compilation = compilationMapper.toCompilation(compilationDto);
         Compilation createdCompilation = compilationRepository.save(compilation);
         List<Long> eventIds = compilationDto.getEvents();
@@ -55,12 +55,9 @@ checkName(compilationDto.getTitle());
         return compilationMapper.toCompilationDto(createdCompilation, events);
     }
 
-
-
     public CompilationDto deleteCompilation(Long compId) {
         log.info("Request for deleting Compilation with id = {}", compId);
         checkCompilationExists(compId);
-        Compilation compilation = compilationRepository.findById(compId).orElseGet(Compilation::new);
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
         List<EventShortDto> events = eventRepository.findAllByIds(eventIds)
                 .stream()
@@ -68,7 +65,8 @@ checkName(compilationDto.getTitle());
                 .collect(Collectors.toList());
         eventCompilationRepository.deleteEvents(compId, eventIds);
         compilationRepository.deleteById(compId);
-        return compilationMapper.toCompilationDto(compilation, events);
+        return compilationMapper.toCompilationDto(
+                compilationRepository.findById(compId).orElseGet(Compilation::new), events);
     }
 
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest compilationUpdate) {
@@ -97,7 +95,8 @@ checkName(compilationDto.getTitle());
             newEvents.addAll(addEventToCompilation(existedNewEventIds, compId));
         }
         newEvents.addAll(eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds)));
-        return compilationMapper.toCompilationDto(compilationRepository.save(compilation), newEvents);
+        return compilationMapper.toCompilationDto(
+                compilationRepository.save(compilation), newEvents);
     }
 
     private List<EventShortDto> addEventToCompilation(List<Long> eventIds, Long id) {
@@ -116,14 +115,13 @@ checkName(compilationDto.getTitle());
         if (compilationRepository.existsByTitle(title)) {
             ApiError apiError = ApiError.builder()
                     .message("Compilation with title=" + title + " exists")
-                    .reason("The required object was not found.")
+                    .reason("Conflict in Unique name.")
                     .status(ErrorStatus.E_409_CONFLICT.getValue())
                     .timestamp(LocalDateTime.now())
                     .build();
             throw new ConflictException(apiError);
         }
     }
-
 
     private void checkCompilationExists(Long compId) {
         if (!compilationRepository.existsById(compId)) {

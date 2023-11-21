@@ -22,5 +22,4 @@ public class PublicEventFindParameters {
     private String publicIp;
 
     private String uri;
-
 }

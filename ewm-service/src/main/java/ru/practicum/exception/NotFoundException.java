@@ -8,13 +8,9 @@ import ru.practicum.error.ApiError;
 @Setter
 public class NotFoundException extends RuntimeException {
 
-    private ApiError apiError;
+    private final ApiError apiError;
 
     public NotFoundException(ApiError apiError) {
         this.apiError = apiError;
-    }
-
-    public NotFoundException(String message) {
-        super(message);
     }
 }

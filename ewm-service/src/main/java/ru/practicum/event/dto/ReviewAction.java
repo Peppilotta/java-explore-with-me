@@ -1,7 +1,5 @@
 package ru.practicum.event.dto;
 
-import java.util.Objects;
-
 public enum ReviewAction {
     SEND_TO_REVIEW("SEND_TO_REVIEW"),
     CANCEL_REVIEW("CANCEL_REVIEW");
@@ -20,14 +18,4 @@ public enum ReviewAction {
     public String toString() {
         return String.valueOf(value);
     }
-
-    public static boolean existsByName(String state) {
-        for (ReviewAction reviewAction : values()) {
-            if (Objects.equals(reviewAction.name(), state)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

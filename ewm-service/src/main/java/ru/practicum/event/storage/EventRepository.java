@@ -15,9 +15,6 @@ import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
 
-    @Query("select e from Event e where e.category.id = :categoryId order by e.id")
-    List<Event> findAllByCategory(@Param("categoryId") Long categoryId);
-
     @Query("select e from Event e where e.id in :eventIds")
     List<Event> findAllByIds(@Param("eventIds") List<Long> eventIds);
 
@@ -33,19 +30,13 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     @Query("select e from Event e where e.category.id = :catId")
     List<Event> findAllByCategoryId(@Param("catId") Long catId);
 
-    @Query("select e from Event e where e in :events")
-    List<Event> findAllByEvents(@Param("events") List<Event> events);
-
     @Transactional
     @Modifying
     @Query("update Event e set e.views = e.views + 1 where e.id = :id")
-    int updateViewsById(@Param("id") Long id);
+    void updateViewsById(@Param("id") Long id);
 
     @Transactional
     @Modifying
     @Query("update Event e set e.views = e.views + 1 where e in :events")
-    int updateViewsByEvents(@Param("events") List<Event> events);
-
-
-
+    void updateViewsByEvents(@Param("events") List<Event> events);
 }

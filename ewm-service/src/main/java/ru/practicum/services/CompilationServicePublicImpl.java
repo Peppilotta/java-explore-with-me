@@ -28,7 +28,9 @@ import java.util.stream.Collectors;
 public class CompilationServicePublicImpl implements CompilationServicePublic {
 
     private final CompilationRepository compilationRepository;
+
     private final EventRepository eventRepository;
+
     private final EventMapper eventMapper;
 
     private final EventCompilationRepository eventCompilationRepository;

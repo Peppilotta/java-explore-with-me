@@ -77,15 +77,6 @@ public enum ErrorStatus {
         this.value = value;
     }
 
-    public static ErrorStatus fromValue(String input) {
-        for (ErrorStatus b : ErrorStatus.values()) {
-            if (b.value.equals(input)) {
-                return b;
-            }
-        }
-        return null;
-    }
-
     public String getValue() {
         return value;
     }

@@ -3,7 +3,6 @@ package ru.practicum.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.StatsClient;
@@ -29,9 +28,7 @@ import ru.practicum.services.interfaces.EventServicePublic;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -51,6 +48,7 @@ public class EventServicePublicImpl implements EventServicePublic {
 
     private final StatsClient client;
 
+    @Override
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
         log.info("Get events with parameters Public");
         checkCategoriesInParameters(parameters.getCategories());
@@ -91,6 +89,7 @@ public class EventServicePublicImpl implements EventServicePublic {
         return eventMapper.toShortDtos(filtered);
     }
 
+    @Override
     public EventFullDto getEvent(PublicEventFindParameters parameters) {
         log.info("Get event with parameters Public");
         Long id = parameters.getEventId();
@@ -146,20 +145,16 @@ public class EventServicePublicImpl implements EventServicePublic {
     }
 
     private void saveStatistic(String publicIp, String uri) {
-        EndpointHitDto hit = EndpointHitDto.builder()
-                .app("ewm_service")
-                .timestamp(LocalDateTime.now())
-                .uri(uri)
-                .ip(publicIp)
-                .build();
-        log.info("Statistic saved. Hit = {}", hit);
-        ResponseEntity<Object> response = client.postHit(hit);
-    }
-
-    private void getStatistic(String ip) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", LocalDateTime.now().minusDays(3).toString());
-        parameters.put("end", LocalDateTime.now().toString());
-        ResponseEntity<Object> response = client.getStat(parameters);
+        String app = "ewm_service";
+        if (client.getVisitorsIp(app, uri, publicIp) == 0) {
+            EndpointHitDto hit = EndpointHitDto.builder()
+                    .app(app)
+                    .timestamp(LocalDateTime.now())
+                    .uri(uri)
+                    .ip(publicIp)
+                    .build();
+            EndpointHitDto response = client.postHit(hit);
+            log.info("Statistic saved. Hit = {}", response);
+        }
     }
 }
