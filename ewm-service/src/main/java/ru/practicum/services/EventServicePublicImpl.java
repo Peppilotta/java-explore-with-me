@@ -29,7 +29,9 @@ import ru.practicum.services.interfaces.EventServicePublic;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -152,5 +154,12 @@ public class EventServicePublicImpl implements EventServicePublic {
                 .build();
         log.info("Statistic saved. Hit = {}", hit);
         ResponseEntity<Object> response = client.postHit(hit);
+    }
+
+    private void getStatistic(String ip) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("start", LocalDateTime.now().minusDays(3).toString());
+        parameters.put("end", LocalDateTime.now().toString());
+        ResponseEntity<Object> response = client.getStat(parameters);
     }
 }

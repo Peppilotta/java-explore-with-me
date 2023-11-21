@@ -97,73 +97,66 @@ public class EventMapper {
     }
 
     public Event fromUpdatedByUser(Event event, UpdateEventUserRequest eventUpdate) {
-        String annotation = eventUpdate.getAnnotation();
-        if (!Objects.isNull(annotation)) {
-            event.setAnnotation(annotation);
+        if (!Objects.isNull(eventUpdate.getAnnotation())) {
+            event.setAnnotation(eventUpdate.getAnnotation());
         }
 
-        String description = eventUpdate.getDescription();
-        if (!Objects.isNull(description)) {
-            event.setDescription(description);
+        if (!Objects.isNull(eventUpdate.getDescription())) {
+            event.setDescription(eventUpdate.getDescription());
         }
 
-        Boolean paid = eventUpdate.getPaid();
-        if (!Objects.isNull(paid)) {
-            event.setPaid(paid);
+        if (!Objects.isNull(eventUpdate.getPaid())) {
+            event.setPaid(eventUpdate.getPaid());
         }
-        Integer participantLimit = eventUpdate.getParticipantLimit();
-        if (!Objects.isNull(participantLimit)) {
-            event.setParticipantLimit(participantLimit);
+
+        if (!Objects.isNull(eventUpdate.getParticipantLimit())) {
+            event.setParticipantLimit(eventUpdate.getParticipantLimit());
         }
-        Boolean requestModeration = eventUpdate.getRequestModeration();
-        if (!Objects.isNull(requestModeration)) {
-            event.setRequestModeration(requestModeration);
+
+        if (!Objects.isNull(eventUpdate.getRequestModeration())) {
+            event.setRequestModeration(eventUpdate.getRequestModeration());
         }
-        ReviewAction action = eventUpdate.getStateAction();
-        if (!Objects.isNull(action)) {
-            event.setState(Objects.equals(action, ReviewAction.CANCEL_REVIEW)
+
+        if (!Objects.isNull(eventUpdate.getStateAction())) {
+            event.setState(Objects.equals(eventUpdate.getStateAction(), ReviewAction.CANCEL_REVIEW)
                     ? EventLifeState.CANCELED
                     : EventLifeState.PENDING);
         }
-        String title = eventUpdate.getTitle();
-        if (!Objects.isNull(title)) {
-            event.setTitle(title);
+
+        if (!Objects.isNull(eventUpdate.getTitle())) {
+            event.setTitle(eventUpdate.getTitle());
         }
         return event;
     }
 
     public Event fromUpdatedByAdmin(Event event, UpdateEventAdminRequest eventUpdate) {
-        String annotation = eventUpdate.getAnnotation();
-        if (!Objects.isNull(annotation)) {
-            event.setAnnotation(annotation);
+        if (!Objects.isNull(eventUpdate.getAnnotation())) {
+            event.setAnnotation(eventUpdate.getAnnotation());
         }
 
-        String description = eventUpdate.getDescription();
-        if (!Objects.isNull(description)) {
-            event.setDescription(description);
+        if (!Objects.isNull(eventUpdate.getDescription())) {
+            event.setDescription(eventUpdate.getDescription());
         }
 
-        Boolean paid = eventUpdate.getPaid();
-        if (!Objects.isNull(paid)) {
-            event.setPaid(paid);
+        if (!Objects.isNull(eventUpdate.getPaid())) {
+            event.setPaid(eventUpdate.getPaid());
         }
-        Integer participantLimit = eventUpdate.getParticipantLimit();
-        if (!Objects.isNull(participantLimit)) {
-            event.setParticipantLimit(participantLimit);
+        if (!Objects.isNull(eventUpdate.getParticipantLimit())) {
+            event.setParticipantLimit(eventUpdate.getParticipantLimit());
         }
-        Boolean requestModeration = eventUpdate.getRequestModeration();
-        if (!Objects.isNull(requestModeration)) {
-            event.setRequestModeration(requestModeration);
+
+        if (!Objects.isNull(eventUpdate.getRequestModeration())) {
+            event.setRequestModeration(eventUpdate.getRequestModeration());
         }
-        StateAction stateAction = eventUpdate.getStateAction();
-        if (!Objects.isNull(stateAction)) {
-            event.setState(Objects.equals(stateAction, StateAction.PUBLISH_EVENT)
+
+        if (!Objects.isNull(eventUpdate.getStateAction())) {
+            event.setState(Objects.equals(eventUpdate.getStateAction(), StateAction.PUBLISH_EVENT)
                     ? EventLifeState.PUBLISHED
                     : EventLifeState.CANCELED);
         }
-        String title = eventUpdate.getTitle();
-        if (!Objects.isNull(title)) {
-            event.setTitle(title);
+
+        if (!Objects.isNull(eventUpdate.getTitle())) {
+            event.setTitle(eventUpdate.getTitle());
         }
         return event;
     }

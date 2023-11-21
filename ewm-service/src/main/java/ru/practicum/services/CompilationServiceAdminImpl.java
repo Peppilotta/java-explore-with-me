@@ -17,6 +17,7 @@ import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.storage.EventRepository;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.services.interfaces.CompilationServiceAdmin;
 
@@ -43,7 +44,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
 
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
         log.info("Request for creating Compilation = {}", compilationDto);
-
+checkName(compilationDto.getTitle());
         Compilation compilation = compilationMapper.toCompilation(compilationDto);
         Compilation createdCompilation = compilationRepository.save(compilation);
         List<Long> eventIds = compilationDto.getEvents();
@@ -53,6 +54,8 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         }
         return compilationMapper.toCompilationDto(createdCompilation, events);
     }
+
+
 
     public CompilationDto deleteCompilation(Long compId) {
         log.info("Request for deleting Compilation with id = {}", compId);
@@ -73,26 +76,26 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
         checkCompilationExists(compId);
         Compilation compilation = compilationRepository.findById(compId).orElseGet(Compilation::new);
 
-        String title = compilationUpdate.getTitle();
-        if (!Objects.isNull(title)) {
-            compilation.setTitle(title);
+        if (!Objects.isNull(compilationUpdate.getTitle())) {
+            checkName(compilationUpdate.getTitle());
+            compilation.setTitle(compilationUpdate.getTitle());
         }
-
-        boolean pinned = compilationUpdate.getPinned();
-        if (!Objects.isNull(pinned)) {
-            compilation.setPinned(pinned);
+        if (!Objects.isNull(compilationUpdate.getPinned())) {
+            compilation.setPinned(compilationUpdate.getPinned());
         }
-
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
-        List<Long> updatedEventIds = compilationUpdate.getEvents();
-        if (!eventIds.isEmpty()) {
-            updatedEventIds.removeAll(eventIds);
-        }
-        List<Long> existedNewEventIds = updatedEventIds.stream()
-                .filter(eventRepository::existsById)
-                .collect(Collectors.toList());
+        List<EventShortDto> newEvents = new ArrayList<>();
+        if (!Objects.isNull(compilationUpdate.getEvents())) {
+            List<Long> updatedEventIds = compilationUpdate.getEvents();
+            if (!eventIds.isEmpty()) {
+                updatedEventIds.removeAll(eventIds);
+            }
+            List<Long> existedNewEventIds = updatedEventIds.stream()
+                    .filter(eventRepository::existsById)
+                    .collect(Collectors.toList());
 
-        List<EventShortDto> newEvents = addEventToCompilation(existedNewEventIds, compId);
+            newEvents.addAll(addEventToCompilation(existedNewEventIds, compId));
+        }
         newEvents.addAll(eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds)));
         return compilationMapper.toCompilationDto(compilationRepository.save(compilation), newEvents);
     }
@@ -108,6 +111,19 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
             return eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds));
         }
     }
+
+    private void checkName(String title) {
+        if (compilationRepository.existsByTitle(title)) {
+            ApiError apiError = ApiError.builder()
+                    .message("Compilation with title=" + title + " exists")
+                    .reason("The required object was not found.")
+                    .status(ErrorStatus.E_409_CONFLICT.getValue())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            throw new ConflictException(apiError);
+        }
+    }
+
 
     private void checkCompilationExists(Long compId) {
         if (!compilationRepository.existsById(compId)) {

@@ -30,11 +30,10 @@ public class CompilationsControllerPublic {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    List<CompilationDto> getCompilationsPageable(@RequestParam(defaultValue = "true") boolean pinned,
+    List<CompilationDto> getCompilationsPageable(@RequestParam(required = false) boolean pinned,
                                                  @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                  @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
-
         return compilationService.getCompilations(pinned, pageable);
     }
 
