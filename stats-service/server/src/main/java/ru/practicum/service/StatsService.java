@@ -63,7 +63,7 @@ public class StatsService {
         LocalDateTime dateTimeStart = LocalDateTime.parse(start, formatter);
         LocalDateTime dateTimeEnd = LocalDateTime.parse(end, formatter);
 
-        if (dateTimeEnd.isBefore(dateTimeEnd)) {
+        if (dateTimeEnd.isBefore(dateTimeStart)) {
             throw new BadRequestException("End is before start");
         }
         List<VisitorsStatsDto> stats = new ArrayList<>();
