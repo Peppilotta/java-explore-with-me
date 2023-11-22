@@ -11,6 +11,7 @@ import ru.practicum.dto.VisitorMapper;
 import ru.practicum.dto.VisitorWithoutEndpoint;
 import ru.practicum.model.Endpoint;
 import ru.practicum.model.Visitor;
+import ru.practicum.statexception.BadRequestException;
 import ru.practicum.storage.EndpointRepository;
 import ru.practicum.storage.VisitorRepository;
 
@@ -25,9 +26,14 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class StatsService {
     private final EndpointRepository endpointRepository;
+
     private final VisitorRepository visitorRepository;
+
     private final EndpointMapper endpointMapper;
+
     private final VisitorMapper visitorMapper;
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public EndpointHitDto addHit(EndpointHitDto endpointHitDto) {
         String uri = endpointHitDto.getUri();
@@ -53,9 +59,13 @@ public class StatsService {
     }
 
     public List<VisitorsStatsDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         LocalDateTime dateTimeStart = LocalDateTime.parse(start, formatter);
         LocalDateTime dateTimeEnd = LocalDateTime.parse(end, formatter);
+
+        if (dateTimeEnd.isBefore(dateTimeEnd)) {
+            throw new BadRequestException("End is before start");
+        }
         List<VisitorsStatsDto> stats = new ArrayList<>();
         if (Objects.isNull(uris)) {
             stats.addAll((Objects.isNull(unique) || !unique)
