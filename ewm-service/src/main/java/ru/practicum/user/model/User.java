@@ -1,7 +1,6 @@
 package ru.practicum.user.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +20,6 @@ import javax.persistence.Table;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 public class User {
 
     @Id
@@ -29,7 +27,7 @@ public class User {
     @Column(name = "user_id")
     private long id;
 
-    @Column(name = "email",nullable = false, length = 512, unique = true)
+    @Column(name = "email", nullable = false, length = 512, unique = true)
     private String email;
 
     @Column(name = "name", nullable = false)

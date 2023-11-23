@@ -2,8 +2,6 @@ package ru.practicum.user.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,10 +14,8 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 public class UserDto {
 
     @Setter(AccessLevel.NONE)

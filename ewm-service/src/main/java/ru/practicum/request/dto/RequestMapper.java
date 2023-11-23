@@ -12,13 +12,14 @@ import java.util.stream.Collectors;
 public class RequestMapper {
 
     public ParticipationRequestDto toDto(Request request) {
-        return ParticipationRequestDto.builder()
-                .id(request.getId())
-                .event(request.getEvent().getId())
-                .requester(request.getRequester().getId())
-                .created(request.getCreated())
-                .status(request.getStatus())
-                .build();
+        ParticipationRequestDto dto = new ParticipationRequestDto();
+        dto.setId(request.getId());
+        dto.setEvent(request.getEvent().getId());
+        dto.setRequester(request.getRequester().getId());
+        dto.setCreated(request.getCreated());
+        dto.setStatus(request.getStatus());
+
+        return dto;
     }
 
     public List<ParticipationRequestDto> toDtos(List<Request> requests) {

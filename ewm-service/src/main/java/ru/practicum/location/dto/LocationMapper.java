@@ -7,16 +7,13 @@ import ru.practicum.location.model.Location;
 public class LocationMapper {
 
     public LocationDto toDto(Location location) {
-        return LocationDto.builder()
-                .lat(location.getLat())
-                .lon(location.getLon())
-                .build();
+        return new LocationDto(location.getLat(), location.getLon());
     }
 
     public Location toLocation(LocationDto locationDto) {
-        return Location.builder()
-                .lat(locationDto.getLat())
-                .lon(locationDto.getLon())
-                .build();
+        Location location = new Location();
+        location.setLat(locationDto.getLat());
+        location.setLon(locationDto.getLon());
+        return location;
     }
 }

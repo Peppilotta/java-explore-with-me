@@ -38,20 +38,20 @@ public class CategoriesControllerAdmin {
 
     @DeleteMapping("/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public CategoryDto deleteCategory(@PathVariable("catId") @Positive long catId) {
+    public CategoryDto deleteCategory(@PathVariable @Positive long catId) {
         return categoryServiceAdmin.deleteCategory(catId);
     }
 
     @PatchMapping("/{catId}")
     @ResponseStatus(HttpStatus.OK)
-    public CategoryDto deleteCategory(@PathVariable("catId") @Positive long catId,
+    public CategoryDto deleteCategory(@PathVariable @Positive long catId,
                                       @RequestBody @Valid final NewCategoryDto category) {
         return categoryServiceAdmin.editCategory(catId, category);
     }
 
     @GetMapping("/{catId}")
     @ResponseStatus(HttpStatus.OK)
-    public CategoryDto getCategory(@PathVariable("catId") @Positive long catId) {
+    public CategoryDto getCategory(@PathVariable @Positive long catId) {
         return categoryServiceAdmin.getCategory(catId);
     }
 

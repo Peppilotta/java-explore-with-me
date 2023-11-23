@@ -51,17 +51,18 @@ public class EventControllerPublic {
                                          @RequestParam(defaultValue = "10") @Positive Integer size,
                                          HttpServletRequest request) {
 
-        PublicEventsFindParameters eventFindParameters = PublicEventsFindParameters.builder()
-                .text(text)
-                .categories(Objects.isNull(categories) ? new ArrayList<>() : categories)
-                .paid(paid)
-                .rangeStart(Objects.isNull(rangeStart) ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, formatter))
-                .rangeEnd(Objects.isNull(rangeEnd) ? null : LocalDateTime.parse(rangeEnd, formatter))
-                .onlyAvailable(onlyAvailable)
-                .sort(sort)
-                .publicIp(request.getRemoteAddr())
-                .uri(request.getRequestURI())
-                .build();
+        PublicEventsFindParameters eventFindParameters = new PublicEventsFindParameters();
+        eventFindParameters.setText(text);
+        eventFindParameters.setCategories(Objects.isNull(categories) ? new ArrayList<>() : categories);
+        eventFindParameters.setPaid(paid);
+        eventFindParameters.setRangeStart(Objects.isNull(rangeStart)
+                ? LocalDateTime.now()
+                : LocalDateTime.parse(rangeStart, formatter));
+        eventFindParameters.setRangeEnd(Objects.isNull(rangeEnd) ? null : LocalDateTime.parse(rangeEnd, formatter));
+        eventFindParameters.setOnlyAvailable(onlyAvailable);
+        eventFindParameters.setSort(sort);
+        eventFindParameters.setPublicIp(request.getRemoteAddr());
+        eventFindParameters.setUri(request.getRequestURI());
 
         Pageable pageable = PageRequest.of(from / size, size);
 
@@ -70,13 +71,12 @@ public class EventControllerPublic {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEvent(@PathVariable(name = "id") @Positive Long id,
+    public EventFullDto getEvent(@PathVariable @Positive Long id,
                                  HttpServletRequest request) {
-        PublicEventFindParameters parameters = PublicEventFindParameters.builder()
-                .eventId(id)
-                .publicIp(request.getRemoteAddr())
-                .uri(request.getRequestURI())
-                .build();
+        PublicEventFindParameters parameters = new PublicEventFindParameters();
+        parameters.setEventId(id);
+        parameters.setPublicIp(request.getRemoteAddr());
+        parameters.setUri(request.getRequestURI());
         return service.getEvent(parameters);
     }
 }

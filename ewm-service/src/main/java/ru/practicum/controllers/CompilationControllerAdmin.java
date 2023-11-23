@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.services.interfaces.CompilationServiceAdmin;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.services.interfaces.CompilationServiceAdmin;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -37,13 +37,13 @@ public class CompilationControllerAdmin {
 
     @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public CompilationDto deleteCompilation(@PathVariable(name = "compId") @Positive Long compId) {
+    public CompilationDto deleteCompilation(@PathVariable @Positive Long compId) {
         return service.deleteCompilation(compId);
     }
 
     @PatchMapping("/{compId}")
     @ResponseStatus(HttpStatus.OK)
-    public CompilationDto updateCompilation(@PathVariable(name = "compId") @Positive Long compId,
+    public CompilationDto updateCompilation(@PathVariable @Positive Long compId,
                                             @RequestBody @Valid final UpdateCompilationRequest compilation) {
         return service.updateCompilation(compId, compilation);
     }

@@ -57,7 +57,7 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long>, JpaSp
             "order by count(distinct v.ip) desc ")
     List<VisitorsStatsDto> getAllUniqueUrisFromList(LocalDateTime start, LocalDateTime end);
 
-    @Query("select count(distinct v.ip)  " +
+    @Query("select count(v.ip)  " +
             "from Endpoint as e " +
             "inner join e.visitors v " +
             "where e.app = :app and e.uri = :uri and v.ip = :visitorIp ")

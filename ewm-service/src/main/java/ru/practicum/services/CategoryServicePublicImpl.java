@@ -40,12 +40,10 @@ public class CategoryServicePublicImpl implements CategoryServicePublic {
 
     private void checkCategoryExists(Long catId) {
         if (!categoryRepository.existsById(catId)) {
-            ApiError apiError = ApiError.builder()
-                    .message("Category with id=" + catId + "  was not found")
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new  ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "Category with id=" + catId + "  was not found",
+                    LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }

@@ -34,15 +34,17 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<VisitorsStatsDto> getStats(@RequestParam @Past String start,
-                                           @RequestParam @PastOrPresent String end,
+    public List<VisitorsStatsDto> getStats(@RequestParam @Valid @Past final String start,
+                                           @RequestParam @Valid @PastOrPresent final String end,
                                            @RequestParam List<String> uris,
                                            @RequestParam(defaultValue = "false") Boolean unique) {
         return statsService.getStatistic(start, end, uris, unique);
     }
 
     @GetMapping("/visitors")
-    Long getVisitorsIp(@RequestParam String app, @RequestParam String uri, String ip) {
+    Long getVisitorsIp(@RequestParam String app,
+                       @RequestParam String uri,
+                       @RequestParam String ip) {
         return statsService.getVisitorsIp(app, uri, ip);
     }
 }

@@ -105,35 +105,30 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
     private List<EventShortDto> addEventToCompilation(List<Long> eventIds, Long id) {
         if (eventIds.isEmpty()) {
             return new ArrayList<>();
-        } else {
-            List<EventCompilation> eventCompilations = eventIds.stream()
-                    .map(e -> compilationMapper.toEventCompilation(new NewEventCompilationDto(id, e)))
-                    .collect(Collectors.toList());
-            eventCompilationRepository.saveAll(eventCompilations);
-            return eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds));
         }
+        List<EventCompilation> eventCompilations = eventIds.stream()
+                .map(e -> compilationMapper.toEventCompilation(new NewEventCompilationDto(id, e)))
+                .collect(Collectors.toList());
+        eventCompilationRepository.saveAll(eventCompilations);
+        return eventMapper.toShortDtos(eventRepository.findAllByIds(eventIds));
     }
 
     private void checkName(String title) {
         if (compilationRepository.existsByTitle(title)) {
-            ApiError apiError = ApiError.builder()
-                    .message("Compilation with title=" + title + " exists")
-                    .reason("Conflict in Unique name.")
-                    .status(ErrorStatus.E_409_CONFLICT.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
+                    "Conflict in Unique name.",
+                    "Compilation with title=" + title + " exists",
+                    LocalDateTime.now());
             throw new ConflictException(apiError);
         }
     }
 
     private void checkCompilationExists(Long compId) {
         if (!compilationRepository.existsById(compId)) {
-            ApiError apiError = ApiError.builder()
-                    .message("Compilation with id=" + compId + " not exists")
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "Compilation with id=" + compId + " not exists",
+                    LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }

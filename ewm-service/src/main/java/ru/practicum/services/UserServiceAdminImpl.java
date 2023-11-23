@@ -64,24 +64,18 @@ public class UserServiceAdminImpl {
 
     private void checkUserExistence(Long id) {
         if (!userRepository.existsById(id)) {
-            ApiError apiError = ApiError.builder()
-                    .message("User with id=" + id + " not exists.")
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "User with id=" + id + " not exists.", LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }
 
     private void checkEmail(String email) {
         if (userRepository.existsByEmail(email)) {
-            ApiError apiError = ApiError.builder()
-                    .message("User with email=" + email + " not exists.")
-                    .reason("Integrity constraint has been violated.")
-                    .status(ErrorStatus.E_409_CONFLICT.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
+                    "Integrity constraint has been violated.",
+                    "User with email=" + email + " already exists.", LocalDateTime.now());
             throw new ConflictException(apiError);
         }
     }

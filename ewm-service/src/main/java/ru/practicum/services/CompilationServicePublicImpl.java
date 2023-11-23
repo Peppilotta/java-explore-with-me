@@ -66,13 +66,9 @@ public class CompilationServicePublicImpl implements CompilationServicePublic {
 
     private void checkCompilationExists(Long compId) {
         if (!compilationRepository.existsById(compId)) {
-            String message = "Compilation with id=" + compId + " not exists";
-            ApiError apiError = ApiError.builder()
-                    .message(message)
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "Compilation with id=" + compId + " not exists", LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }

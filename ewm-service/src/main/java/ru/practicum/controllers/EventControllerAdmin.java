@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.AdminEventsFindParameters;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.services.interfaces.EventService;
 
@@ -51,13 +51,14 @@ public class EventControllerAdmin {
                                         @RequestParam(required = false) String rangeEnd,
                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
-        AdminEventsFindParameters eventsFindParameters = AdminEventsFindParameters.builder()
-                .users(Objects.isNull(users) ? new ArrayList<>() : users)
-                .states(Objects.isNull(states) ? new ArrayList<>() : states)
-                .categories(Objects.isNull(categories) ? new ArrayList<>() : categories)
-                .rangeStart(Objects.isNull(rangeStart) ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, formatter))
-                .rangeEnd(Objects.isNull(rangeEnd) ? null : LocalDateTime.parse(rangeEnd, formatter))
-                .build();
+        AdminEventsFindParameters eventsFindParameters = new AdminEventsFindParameters();
+        eventsFindParameters.setUsers(Objects.isNull(users) ? new ArrayList<>() : users);
+        eventsFindParameters.setStates(Objects.isNull(states) ? new ArrayList<>() : states);
+        eventsFindParameters.setCategories(Objects.isNull(categories) ? new ArrayList<>() : categories);
+        eventsFindParameters.setRangeStart(Objects.isNull(rangeStart)
+                ? LocalDateTime.now()
+                : LocalDateTime.parse(rangeStart, formatter));
+        eventsFindParameters.setRangeEnd(Objects.isNull(rangeEnd) ? null : LocalDateTime.parse(rangeEnd, formatter));
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.ASC, EVENT_ID_FIELD_NAME));
         return service.getEventsByAdmin(eventsFindParameters, pageable);
@@ -65,13 +66,13 @@ public class EventControllerAdmin {
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEvent(@PathVariable("eventId") @Positive Long eventId) {
+    public EventFullDto getEvent(@PathVariable @Positive Long eventId) {
         return service.getEventByAdmin(eventId);
     }
 
     @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto patchEvent(@PathVariable("eventId") @Positive Long eventId,
+    public EventFullDto patchEvent(@PathVariable @Positive Long eventId,
                                    @RequestBody @Valid final UpdateEventAdminRequest event) {
         return service.patchEventByAdmin(eventId, event);
     }

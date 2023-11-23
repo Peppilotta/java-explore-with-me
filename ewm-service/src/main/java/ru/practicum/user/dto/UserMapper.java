@@ -16,24 +16,17 @@ public class UserMapper {
     }
 
     public UserShortDto toUserShort(User user) {
-        return UserShortDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .build();
+        return new UserShortDto(user.getId(), user.getName());
     }
 
     public User toUserFromNew(NewUserRequest userDto) {
-        return User.builder()
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
+        User user = new User();
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+        return user;
     }
 
     public UserDto toDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+        return new UserDto(user.getId(), user.getName(), user.getEmail());
     }
 }

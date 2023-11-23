@@ -12,10 +12,10 @@ public class VisitorMapper {
     }
 
     public Visitor toVisitor(VisitorWithoutEndpoint visitor, EndpointWithoutVisitors endpoint) {
-        return Visitor.builder()
-                .endpoint(endpointMapper.fromWithoutVisitors(endpoint))
-                .timestamp(visitor.getTimestamp())
-                .ip(visitor.getIp())
-                .build();
+        Visitor converted = new Visitor();
+        converted.setEndpoint(endpointMapper.fromWithoutVisitors(endpoint));
+        converted.setTimestamp(visitor.getTimestamp());
+        converted.setIp(visitor.getIp());
+        return converted;
     }
 }

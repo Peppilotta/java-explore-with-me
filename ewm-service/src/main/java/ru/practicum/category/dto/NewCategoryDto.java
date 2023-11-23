@@ -1,8 +1,6 @@
 package ru.practicum.category.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,10 +13,8 @@ import javax.validation.constraints.Size;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 public class NewCategoryDto {
 
     @NotNull(message = "Field: name. Error: must not be blank. Value: null")

@@ -70,26 +70,16 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     private final LocationMapper locationMapper;
 
-    private final ApiError apiErrorConflict = ApiError.builder()
-            .message("")
-            .reason("For the requested operation the conditions are not met.")
-            .status(ErrorStatus.E_409_CONFLICT.getValue())
-            .timestamp(LocalDateTime.now())
-            .build();
+    private final ApiError apiErrorConflict = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
+            "For the requested operation the conditions are not met.",
+            "", LocalDateTime.now());
 
-    private final ApiError apiError = ApiError.builder()
-            .message("")
-            .reason("The required object was not found.")
-            .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-            .timestamp(LocalDateTime.now())
-            .build();
+    private final ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+            "The required object was not found.",
+            "", LocalDateTime.now());
 
-    private final ApiError apiErrorBadRequest = ApiError.builder()
-            .message("")
-            .reason("Incorrectly made request.")
-            .status(ErrorStatus.E_400_BAD_REQUEST.getValue())
-            .timestamp(LocalDateTime.now())
-            .build();
+    private final ApiError apiErrorBadRequest = new ApiError(ErrorStatus.E_400_BAD_REQUEST.getValue(),
+            "Incorrectly made request.", "", LocalDateTime.now());
 
     @Override
     public List<EventShortDto> getEvents(Long userId, Pageable pageable) {

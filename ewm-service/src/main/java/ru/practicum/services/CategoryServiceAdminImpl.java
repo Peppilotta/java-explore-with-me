@@ -76,36 +76,27 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
 
     private void checkCategoryExists(Long catId) {
         if (!categoryRepository.existsById(catId)) {
-            String message = "Category with id=" + catId + "  was not found";
-            ApiError apiError = ApiError.builder()
-                    .message(message)
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "Category with id=" + catId + "  was not found",
+                    LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }
 
     private void checkEventsOfCategoryExists(Long catId) {
         if (!eventRepository.findAllByCategoryId(catId).isEmpty()) {
-            ApiError apiError = ApiError.builder()
-                    .message("The category is not empty")
-                    .reason("For the requested operation the conditions are not met.")
-                    .status(ErrorStatus.E_409_CONFLICT.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
+                    "For the requested operation the conditions are not met.",
+                    "The category is not empty", LocalDateTime.now());
             throw new ConflictException(apiError);
         }
     }
 
     private void checkCategoryNameUnique(String name, Long id) {
-        ApiError apiError = ApiError.builder()
-                .message("The category with name = " + name + " exists")
-                .reason("For the requested operation the conditions are not met.")
-                .status(ErrorStatus.E_409_CONFLICT.getValue())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ApiError apiError = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
+                "For the requested operation the conditions are not met.",
+                "The category with name = " + name + " exists", LocalDateTime.now());
 
         if (categoryRepository.existsByName(name)
                 && (id == 0 || !Objects.equals((categoryRepository.findByName(name).getId()), id))) {

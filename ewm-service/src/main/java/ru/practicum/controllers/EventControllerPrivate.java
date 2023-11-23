@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.services.interfaces.EventService;
+import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.services.interfaces.EventService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -44,7 +44,7 @@ public class EventControllerPrivate {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getEvents(
-            @PathVariable(name = "userId") @Positive Long userId,
+            @PathVariable @Positive Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size,
@@ -54,22 +54,22 @@ public class EventControllerPrivate {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto addEvent(@PathVariable(name = "userId") @Positive Long userId,
+    public EventFullDto addEvent(@PathVariable @Positive Long userId,
                                  @RequestBody @Valid final NewEventDto event) {
         return eventService.addEvent(userId, event);
     }
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEvent(@PathVariable(name = "userId") @Positive Long userId,
-                                 @PathVariable(name = "eventId") @Positive Long eventId) {
+    public EventFullDto getEvent(@PathVariable @Positive Long userId,
+                                 @PathVariable @Positive Long eventId) {
         return eventService.getEvent(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto updateEvent(@PathVariable(name = "userId") @Positive Long userId,
-                                    @PathVariable(name = "eventId") @Positive Long eventId,
+    public EventFullDto updateEvent(@PathVariable @Positive Long userId,
+                                    @PathVariable @Positive Long eventId,
                                     @RequestBody @Valid final UpdateEventUserRequest event) {
         return eventService.updateEvent(userId, eventId, event);
     }
@@ -77,16 +77,16 @@ public class EventControllerPrivate {
     @GetMapping("/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public List<ParticipationRequestDto> getRequestsForParticipation(
-            @PathVariable(name = "userId") @Positive Long userId,
-            @PathVariable(name = "eventId") @Positive Long eventId) {
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long eventId) {
         return eventService.getRequestsForParticipation(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public EventRequestStatusUpdateResult updateRequestStatus(
-            @PathVariable(name = "userId") @Positive Long userId,
-            @PathVariable(name = "eventId") @Positive Long eventId,
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long eventId,
             @RequestBody @Valid final EventRequestStatusUpdateRequest request) {
         return eventService.updateRequestStatus(userId, eventId, request);
     }

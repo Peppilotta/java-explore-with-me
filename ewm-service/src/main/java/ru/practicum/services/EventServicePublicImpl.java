@@ -108,13 +108,10 @@ public class EventServicePublicImpl implements EventServicePublic {
 
     private void checkCategoriesInParameters(List<Long> categories) {
         if (!Objects.isNull(categories) && !categories.isEmpty()) {
-            ApiError apiError = ApiError.builder()
-                    .message("Bad categories parameter")
-                    .reason("Bad request parameters")
-                    .status(ErrorStatus.E_400_BAD_REQUEST.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
+            ApiError apiError = new ApiError(ErrorStatus.E_400_BAD_REQUEST.getValue(),
+                    "Bad request parameters",
+                    "Bad categories parameter",
+                    LocalDateTime.now());
             categories.forEach(u ->
                     categoryRepository.findById(u).orElseThrow(() ->
                             new BadRequestException(apiError)));
@@ -123,24 +120,20 @@ public class EventServicePublicImpl implements EventServicePublic {
 
     private void checkEventExists(Long id) {
         if (!eventRepository.existsById(id)) {
-            ApiError apiError = ApiError.builder()
-                    .message("Event with id=" + id + " was not found")
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "Event with id=" + id + " was not found",
+                    LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }
 
     private void checkEventPublished(EventLifeState state) {
         if (!Objects.equals(state, EventLifeState.PUBLISHED)) {
-            ApiError apiError = ApiError.builder()
-                    .message("Event not Published")
-                    .reason("The required object was not found.")
-                    .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+            ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+                    "The required object was not found.",
+                    "Event not Published",
+                    LocalDateTime.now());
             throw new NotFoundException(apiError);
         }
     }
@@ -149,12 +142,7 @@ public class EventServicePublicImpl implements EventServicePublic {
         String app = "ewm_service";
         Long visitWithIp = client.getVisitorsIp(app, uri, publicIp);
         log.info("ip={}, count={}", publicIp, visitWithIp);
-        EndpointHitDto hit = EndpointHitDto.builder()
-                .app(app)
-                .timestamp(LocalDateTime.now())
-                .uri(uri)
-                .ip(publicIp)
-                .build();
+        EndpointHitDto hit = new EndpointHitDto(app, uri, publicIp, LocalDateTime.now());
         EndpointHitDto response = client.postHit(hit);
         log.info("Statistic saved. Hit = {}", response);
         return visitWithIp;

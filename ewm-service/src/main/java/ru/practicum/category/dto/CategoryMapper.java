@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 public class CategoryMapper {
 
     public Category toCategory(NewCategoryDto categoryDto) {
-        return Category.builder()
-                .name(categoryDto.getName())
-                .build();
+        Category category = new Category();
+        category.setName(categoryDto.getName());
+        return category;
     }
 
     public CategoryDto toDto(Category category) {
-        return CategoryDto.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .build();
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(category.getId());
+        categoryDto.setName(category.getName());
+        return categoryDto;
     }
 
     public List<CategoryDto> toDtos(List<Category> categories) {

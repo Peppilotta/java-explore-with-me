@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 
 import java.util.List;
@@ -30,12 +29,10 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     @Query("select e from Event e where e.category.id = :catId")
     List<Event> findAllByCategoryId(@Param("catId") Long catId);
 
-    @Transactional
     @Modifying
     @Query("update Event e set e.views = e.views + 1 where e.id = :id")
     void updateViewsById(@Param("id") Long id);
 
-    @Transactional
     @Modifying
     @Query("update Event e set e.views = e.views + 1 where e in :events")
     void updateViewsByEvents(@Param("events") List<Event> events);

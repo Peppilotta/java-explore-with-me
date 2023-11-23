@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
 
@@ -15,7 +14,7 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    boolean existsById(@Nullable Long id);
+ //   boolean existsById(@Nullable Long id);
 
     @Query("select new ru.practicum.category.dto.CategoryDto(c.id, c.name) from Category as c order by c.id")
     Page<CategoryDto> findAllPageable(Pageable pageable);
@@ -27,7 +26,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Category findByName(String name);
 
-    @Transactional
     @Modifying
     @Query("delete from Category as c where c.id = :id")
     void deleteById(@Param("id") @Nullable Long id);

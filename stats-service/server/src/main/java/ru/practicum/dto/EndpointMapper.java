@@ -11,43 +11,42 @@ import java.util.ArrayList;
 public class EndpointMapper {
 
     public Endpoint toEndpoint(EndpointHitDto endpointHitDto) {
-        return Endpoint.builder()
-                .app(endpointHitDto.getApp())
-                .uri(endpointHitDto.getUri())
-                .build();
+        Endpoint endpoint = new Endpoint();
+        endpoint.setApp(endpointHitDto.getApp());
+        endpoint.setUri(endpointHitDto.getUri());
+        return endpoint;
     }
 
     public VisitorWithoutEndpoint toVisitor(EndpointHitDto endpointHitDto) {
-        return VisitorWithoutEndpoint.builder()
-                .ip(endpointHitDto.getIp())
-                .timestamp(endpointHitDto.getTimestamp())
-                .build();
+        VisitorWithoutEndpoint visitor = new VisitorWithoutEndpoint();
+        visitor.setIp(endpointHitDto.getIp());
+        visitor.setTimestamp(endpointHitDto.getTimestamp());
+        return visitor;
     }
 
     public EndpointHitDto toEndpointHitDto(Visitor visitor, EndpointWithoutVisitors endpoint) {
-        return EndpointHitDto.builder()
-                .id(visitor.getId())
-                .app(endpoint.getApp())
-                .uri(endpoint.getUri())
-                .ip(visitor.getIp())
-                .timestamp(visitor.getTimestamp())
-                .build();
+        EndpointHitDto hit = new EndpointHitDto();
+        hit.setApp(endpoint.getApp());
+        hit.setUri(endpoint.getUri());
+        hit.setIp(visitor.getIp());
+        hit.setTimestamp(visitor.getTimestamp());
+        return hit;
     }
 
     public EndpointWithoutVisitors toWithoutVisitors(Endpoint endpoint) {
-        return EndpointWithoutVisitors.builder()
-                .id(endpoint.getId())
-                .app(endpoint.getApp())
-                .uri(endpoint.getUri())
-                .build();
+        EndpointWithoutVisitors endpointWithoutVisitors = new EndpointWithoutVisitors();
+        endpointWithoutVisitors.setId(endpoint.getId());
+        endpointWithoutVisitors.setApp(endpoint.getApp());
+        endpointWithoutVisitors.setUri(endpoint.getUri());
+        return endpointWithoutVisitors;
     }
 
     public Endpoint fromWithoutVisitors(EndpointWithoutVisitors endpoint) {
-        return Endpoint.builder()
-                .id(endpoint.getId())
-                .app(endpoint.getApp())
-                .uri(endpoint.getUri())
-                .visitors(new ArrayList<>())
-                .build();
+        Endpoint converted = new Endpoint();
+        converted.setId(endpoint.getId());
+        converted.setApp(endpoint.getApp());
+        converted.setUri(endpoint.getUri());
+        converted.setVisitors(new ArrayList<>());
+        return converted;
     }
 }

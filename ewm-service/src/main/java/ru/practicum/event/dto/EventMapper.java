@@ -29,39 +29,41 @@ public class EventMapper {
 
     public Event toEventFromNew(NewEventDto newEvent, Location location, Category category) {
         boolean requestModeration = newEvent.getRequestModeration();
-        return Event.builder()
-                .annotation(newEvent.getAnnotation())
-                .category(category)
-                .description(newEvent.getDescription())
-                .eventDate(newEvent.getEventDate())
-                .initiator(userMapper.fromShort(newEvent.getInitiator()))
-                .createdOn(newEvent.getCreatedOn())
-                .location(location)
-                .state(EventLifeState.PENDING)
-                .paid(newEvent.getPaid())
-                .participantLimit(newEvent.getParticipantLimit())
-                .requestModeration(requestModeration)
-                .views(0L)
-                .title(newEvent.getTitle())
-                .build();
+        Event event = new Event();
+        event.setAnnotation(newEvent.getAnnotation());
+        event.setCategory(category);
+        event.setDescription(newEvent.getDescription());
+        event.setEventDate(newEvent.getEventDate());
+        event.setInitiator(userMapper.fromShort(newEvent.getInitiator()));
+        event.setCreatedOn(newEvent.getCreatedOn());
+        event.setLocation(location);
+        event.setState(EventLifeState.PENDING);
+        event.setPaid(newEvent.getPaid());
+        event.setParticipantLimit(newEvent.getParticipantLimit());
+        event.setRequestModeration(requestModeration);
+        event.setViews(0L);
+        event.setTitle(newEvent.getTitle());
+
+        return event;
     }
 
     public EventShortDto toShortDto(Event event) {
         Long eventId = event.getId();
         Long confirmedRequests = requestRepository
                 .getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-        return EventShortDto.builder()
-                .id(eventId)
-                .annotation(event.getAnnotation())
-                .category(categoryMapper.toDto(event.getCategory()))
-                .confirmedRequests(confirmedRequests)
-                .eventDate(event.getEventDate())
-                .paid(event.getPaid())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .location(locationMapper.toDto(event.getLocation()))
-                .initiator(userMapper.toUserShort(event.getInitiator()))
-                .build();
+        EventShortDto eventShortDto = new EventShortDto();
+        eventShortDto.setId(eventId);
+        eventShortDto.setAnnotation(event.getAnnotation());
+        eventShortDto.setCategory(categoryMapper.toDto(event.getCategory()));
+        eventShortDto.setConfirmedRequests(confirmedRequests);
+        eventShortDto.setEventDate(event.getEventDate());
+        eventShortDto.setPaid(event.getPaid());
+        eventShortDto.setTitle(event.getTitle());
+        eventShortDto.setViews(event.getViews());
+        eventShortDto.setLocation(locationMapper.toDto(event.getLocation()));
+        eventShortDto.setInitiator(userMapper.toUserShort(event.getInitiator()));
+
+        return eventShortDto;
     }
 
     public List<EventShortDto> toShortDtos(List<Event> events) {
@@ -72,24 +74,24 @@ public class EventMapper {
         Long eventId = event.getId();
         Long confirmedRequests = requestRepository
                 .getAllByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-        return EventFullDto.builder()
-                .id(eventId)
-                .annotation(event.getAnnotation())
-                .description(event.getDescription())
-                .paid(event.getPaid())
-                .location(locationMapper.toDto(event.getLocation()))
-                .participantLimit(event.getParticipantLimit())
-                .publishedOn(event.getPublishedOn())
-                .requestModeration(event.getRequestModeration())
-                .state(event.getState())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .createdOn(event.getCreatedOn())
-                .category(categoryMapper.toDto(event.getCategory()))
-                .confirmedRequests(confirmedRequests)
-                .eventDate(event.getEventDate())
-                .initiator(userMapper.toUserShort(event.getInitiator()))
-                .build();
+        EventFullDto eventFullDto = new EventFullDto();
+        eventFullDto.setId(eventId);
+        eventFullDto.setAnnotation(event.getAnnotation());
+        eventFullDto.setDescription(event.getDescription());
+        eventFullDto.setPaid(event.getPaid());
+        eventFullDto.setLocation(locationMapper.toDto(event.getLocation()));
+        eventFullDto.setParticipantLimit(event.getParticipantLimit());
+        eventFullDto.setPublishedOn(event.getPublishedOn());
+        eventFullDto.setRequestModeration(event.getRequestModeration());
+        eventFullDto.setState(event.getState());
+        eventFullDto.setTitle(event.getTitle());
+        eventFullDto.setViews(event.getViews());
+        eventFullDto.setCreatedOn(event.getCreatedOn());
+        eventFullDto.setCategory(categoryMapper.toDto(event.getCategory()));
+        eventFullDto.setConfirmedRequests(confirmedRequests);
+        eventFullDto.setEventDate(event.getEventDate());
+        eventFullDto.setInitiator(userMapper.toUserShort(event.getInitiator()));
+        return eventFullDto;
     }
 
     public Event fromUpdatedByUser(Event event, UpdateEventUserRequest eventUpdate) {

@@ -48,7 +48,7 @@ public class UserControllerAdmin {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public UserDto deleteUser(@PathVariable("id") @Positive long id) {
+    public UserDto deleteUser(@PathVariable @Positive long id) {
         return service.deleteUser(id);
     }
 }

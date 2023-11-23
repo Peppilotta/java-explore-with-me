@@ -36,19 +36,11 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
 
     private final RequestMapper requestMapper;
 
-    private final ApiError apiError = ApiError.builder()
-            .message("")
-            .reason("The required object was not found.")
-            .status(ErrorStatus.E_404_NOT_FOUND.getValue())
-            .timestamp(LocalDateTime.now())
-            .build();
+    private final ApiError apiError = new ApiError(ErrorStatus.E_404_NOT_FOUND.getValue(),
+            "The required object was not found.", "", LocalDateTime.now());
 
-    private final ApiError apiErrorConflict = ApiError.builder()
-            .message("")
-            .reason("Integrity constraint has been violated.")
-            .status(ErrorStatus.E_409_CONFLICT.getValue())
-            .timestamp(LocalDateTime.now())
-            .build();
+    private final ApiError apiErrorConflict = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
+            "Integrity constraint has been violated.", "", LocalDateTime.now());
 
     @Override
     public List<ParticipationRequestDto> getRequests(Long userId) {
@@ -80,12 +72,11 @@ public class RequestServicePrivateImpl implements RequestServicePrivate {
             }
         }
 
-        Request request = Request.builder()
-                .event(event)
-                .requester(userRepository.findById(userId).orElseGet(User::new))
-                .created(LocalDateTime.now())
-                .status(status)
-                .build();
+        Request request = new Request();
+        request.setEvent(event);
+        request.setRequester(userRepository.findById(userId).orElseGet(User::new));
+        request.setCreated(LocalDateTime.now());
+        request.setStatus(status);
         return requestMapper.toDto(requestRepository.save(request));
     }
 

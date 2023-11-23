@@ -13,25 +13,28 @@ import java.util.List;
 public class CompilationMapper {
 
     public Compilation toCompilation(NewCompilationDto compilationDto) {
-        return Compilation.builder()
-                .title(compilationDto.getTitle())
-                .pinned(compilationDto.getPinned())
-                .build();
+        Compilation compilation = new Compilation();
+        compilation.setTitle(compilationDto.getTitle());
+        compilation.setPinned(compilationDto.getPinned());
+
+        return compilation;
     }
 
     public EventCompilation toEventCompilation(NewEventCompilationDto eventCompilationDto) {
-        return EventCompilation.builder()
-                .compilationId(eventCompilationDto.getCompilationId())
-                .eventId(eventCompilationDto.getEventId())
-                .build();
+        EventCompilation eventCompilation = new EventCompilation();
+        eventCompilation.setCompilationId(eventCompilationDto.getCompilationId());
+        eventCompilation.setEventId(eventCompilationDto.getEventId());
+
+        return eventCompilation;
     }
 
     public CompilationDto toCompilationDto(Compilation compilation, List<EventShortDto> events) {
-        return CompilationDto.builder()
-                .id(compilation.getId())
-                .pinned(compilation.getPinned())
-                .title(compilation.getTitle())
-                .events(events)
-                .build();
+        CompilationDto compilationDto = new CompilationDto();
+        compilationDto.setId(compilation.getId());
+        compilationDto.setPinned(compilation.getPinned());
+        compilationDto.setTitle(compilation.getTitle());
+        compilationDto.setEvents(events);
+
+        return compilationDto;
     }
 }

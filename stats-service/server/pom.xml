@@ -13,6 +13,25 @@
 
     <packaging>jar</packaging>
 
+    <profiles>
+        <profile>
+            <id>localRunStats</id>
+            <properties>
+                <database.url>
+                    jdbc:h2:mem:stats
+                </database.url>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
+
     <dependencies>
         <dependency>
             <groupId>org.postgresql</groupId>
