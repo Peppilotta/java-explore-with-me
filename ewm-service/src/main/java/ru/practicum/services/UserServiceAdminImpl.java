@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.exception.ConflictException;
@@ -53,6 +54,7 @@ public class UserServiceAdminImpl {
         return userMapper.toDto(userRepository.save(userMapper.toUserFromNew(user)));
     }
 
+    @Transactional
     public UserDto deleteUser(Long id) {
         log.info("Delete request for user with id={} ", id);
         checkUserExistence(id);

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
 import ru.practicum.error.ApiError;
@@ -122,6 +123,7 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventUpdate) {
         log.info("Update request of user with id={} for event with id={} and updates = {}",
                 userId, eventId, eventUpdate);
@@ -164,6 +166,7 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId,
                                                               Long eventId,
                                                               EventRequestStatusUpdateRequest requestUpdates) {
@@ -242,6 +245,7 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
         log.info("Update event with id={} by admin. Updates = {}", eventId, updatedEvent);
         checkEventExistence(eventId);

@@ -3,6 +3,7 @@ package ru.practicum.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.dto.NewCategoryDto;
@@ -38,6 +39,7 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
     }
 
     @Override
+    @Transactional
     public CategoryDto editCategory(Long catId, NewCategoryDto category) {
         log.info("Request for updating Category with id = {}", catId);
         checkCategoryExists(catId);
@@ -49,6 +51,7 @@ public class CategoryServiceAdminImpl implements CategoryServiceAdmin {
     }
 
     @Override
+    @Transactional
     public CategoryDto deleteCategory(Long catId) {
         log.info("Request for deleting Category with id = {}", catId);
         checkCategoryExists(catId);

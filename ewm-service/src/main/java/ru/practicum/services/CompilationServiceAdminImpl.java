@@ -3,6 +3,7 @@ package ru.practicum.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.CompilationMapper;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -57,6 +58,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
     }
 
     @Override
+    @Transactional
     public CompilationDto deleteCompilation(Long compId) {
         log.info("Request for deleting Compilation with id = {}", compId);
         checkCompilationExists(compId);
@@ -72,6 +74,7 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
     }
 
     @Override
+    @Transactional
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest compilationUpdate) {
         log.info("Request for updating Compilation with id = {} and Updates = {}", compId, compilationUpdate);
         checkCompilationExists(compId);

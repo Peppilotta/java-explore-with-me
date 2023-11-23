@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.StatsClient;
 import ru.practicum.category.storage.CategoryRepository;
@@ -49,6 +50,7 @@ public class EventServicePublicImpl implements EventServicePublic {
     private final StatsClient client;
 
     @Override
+    @Transactional
     public List<EventShortDto> getEvents(PublicEventsFindParameters parameters, Pageable pageable) {
         log.info("Get events with parameters Public");
         checkCategoriesInParameters(parameters.getCategories());
@@ -91,6 +93,7 @@ public class EventServicePublicImpl implements EventServicePublic {
     }
 
     @Override
+    @Transactional
     public EventFullDto getEvent(PublicEventFindParameters parameters) {
         log.info("Get event with parameters Public");
         Long id = parameters.getEventId();
@@ -99,6 +102,7 @@ public class EventServicePublicImpl implements EventServicePublic {
         checkEventPublished(event.getState());
         Long visitsWithIp = saveStatistic(parameters.getPublicIp(), parameters.getUri());
         if (visitsWithIp == 0) {
+
             eventRepository.updateViewsById(id);
             log.info("views for event with id={} updated", id);
         }
