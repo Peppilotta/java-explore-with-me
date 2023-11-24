@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
+import ru.practicum.editing.dto.EventField;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.AdminEventsFindParameters;
@@ -132,6 +133,7 @@ public class EventServicePrivateAdminImpl implements EventService {
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventStatus(event.getState());
         checkUserEvent(userId, event.getInitiator().getId());
+        List<EventField> eventFields = new ArrayList<>();
         UserShortDto initiator = eventUpdate.getInitiator();
         if (!Objects.isNull(initiator)) {
             checkUserEvent(userId, initiator.getId());
@@ -142,16 +144,19 @@ public class EventServicePrivateAdminImpl implements EventService {
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
+            eventFields.add(EventField.CATEGORY);
         }
 
         LocalDateTime date = eventUpdate.getEventDate();
         if (!Objects.isNull(date)) {
             checkEventTime(date);
             event.setEventDate(date);
+            eventFields.add(EventField.EVENT_DATE);
         }
         LocationDto locationDto = eventUpdate.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
+            eventFields.add(EventField.LOCATION);
         }
 
         return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));

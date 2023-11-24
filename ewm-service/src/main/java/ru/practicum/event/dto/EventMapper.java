@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.model.Category;
+import ru.practicum.editing.dto.EventCorrectionDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.location.dto.LocationMapper;
 import ru.practicum.location.model.Location;
@@ -45,6 +46,10 @@ public class EventMapper {
         event.setTitle(newEvent.getTitle());
 
         return event;
+    }
+
+    public EventCorrectionDto toCorrection(Event event) {
+        return new EventCorrectionDto(event.getId(), event.getTitle(), event.getAnnotation(), event.getDescription());
     }
 
     public EventShortDto toShortDto(Event event) {

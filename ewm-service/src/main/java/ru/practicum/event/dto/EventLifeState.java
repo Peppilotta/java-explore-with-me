@@ -5,6 +5,7 @@ import java.util.Objects;
 public enum EventLifeState {
     PENDING("PENDING"),
     PUBLISHED("PUBLISHED"),
+    NOTED("NOTED"),
     CANCELED("CANCELED");
 
     private final String value;
