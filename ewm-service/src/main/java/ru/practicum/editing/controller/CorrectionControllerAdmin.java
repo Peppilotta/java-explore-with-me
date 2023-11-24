@@ -19,7 +19,6 @@ import ru.practicum.editing.dto.RevisionState;
 import ru.practicum.editing.service.CorrectionService;
 
 import javax.validation.constraints.Positive;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -35,7 +34,7 @@ public class CorrectionControllerAdmin {
     public List<CorrectionDto> getCorrectionForEventAdmin(@PathVariable @Positive Long eventId,
                                                           @RequestParam(required = false) List<EventField> eventFields,
                                                           @RequestParam(required = false) List<RevisionState> revisionStates) {
-        return new ArrayList<>();
+        return correctionService.getCorrectionForEventAdmin(eventId, eventFields, revisionStates);
     }
 
     @PostMapping
@@ -51,6 +50,6 @@ public class CorrectionControllerAdmin {
     public List<CorrectionDto> reviewCorrectionByAdmin(@PathVariable @Positive Long eventId,
                                                        @RequestParam List<EventField> eventFields) {
 
-        return new ArrayList<>();
+        return correctionService.reviewCorrectionByAdmin(eventId, eventFields);
     }
 }
