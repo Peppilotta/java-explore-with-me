@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
+import ru.practicum.editing.dto.CorrectionAuthor;
 import ru.practicum.editing.dto.EventField;
+import ru.practicum.editing.service.CorrectionService;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.AdminEventsFindParameters;
@@ -72,6 +74,8 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     private final LocationMapper locationMapper;
 
+    private final CorrectionService correctionService;
+
     private final ApiError apiErrorConflict = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
             "For the requested operation the conditions are not met.",
             "", LocalDateTime.now());
@@ -107,10 +111,18 @@ public class EventServicePrivateAdminImpl implements EventService {
         checkCategoryExistence(categoryId);
         Category category = categoryRepository.findById(categoryId).orElseGet(Category::new);
         event.setCreatedOn(LocalDateTime.now());
-
+        checkLocation(event.getLocation());
         return eventMapper.toFullDto(eventRepository.save(eventMapper.toEventFromNew(event,
                 saveTestedLocation(event.getLocation()),
                 category)));
+    }
+
+    private void checkLocation(LocationDto locationDto) {
+        if (Objects.isNull(locationDto.getLat()) || Objects.isNull(locationDto.getLon())) {
+            apiErrorBadRequest.setMessage("Bad location field ");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
+        }
     }
 
     @Override
@@ -159,6 +171,28 @@ public class EventServicePrivateAdminImpl implements EventService {
             eventFields.add(EventField.LOCATION);
         }
 
+        if (!Objects.isNull(eventUpdate.getAnnotation())) {
+            eventFields.add(EventField.ANNOTATION);
+        }
+
+        if (!Objects.isNull(eventUpdate.getDescription())) {
+            eventFields.add(EventField.DESCRIPTION);
+        }
+
+        if (!Objects.isNull(eventUpdate.getParticipantLimit())) {
+            eventFields.add(EventField.PARTICIPANT_LIMIT);
+        }
+
+        if (!Objects.isNull(eventUpdate.getPaid())) {
+            eventFields.add(EventField.PAID);
+        }
+
+        if (!Objects.isNull(eventUpdate.getRequestModeration())) {
+            eventFields.add(EventField.REQUEST_MODERATION);
+        }
+        if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
+            correctionService.saveCorrectionForEditedFields(eventId, eventFields, CorrectionAuthor.USER);
+        }
         return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));
     }
 
@@ -257,27 +291,55 @@ public class EventServicePrivateAdminImpl implements EventService {
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         EventLifeState initialState = event.getState();
         checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());
+        List<EventField> eventFields = new ArrayList<>();
         Long categoryId = updatedEvent.getCategory();
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
+            eventFields.add(EventField.CATEGORY);
         }
 
         LocalDateTime eventDate = updatedEvent.getEventDate();
         if (!Objects.isNull(eventDate)) {
             checkEventTime(eventDate);
             event.setEventDate(eventDate);
+            eventFields.add(EventField.EVENT_DATE);
         }
 
         LocationDto locationDto = updatedEvent.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
+            eventFields.add(EventField.LOCATION);
         }
+        if (!Objects.isNull(updatedEvent.getAnnotation())) {
+            eventFields.add(EventField.ANNOTATION);
+        }
+
+        if (!Objects.isNull(updatedEvent.getDescription())) {
+            eventFields.add(EventField.DESCRIPTION);
+        }
+
+        if (!Objects.isNull(updatedEvent.getParticipantLimit())) {
+            eventFields.add(EventField.PARTICIPANT_LIMIT);
+        }
+
+        if (!Objects.isNull(updatedEvent.getPaid())) {
+            eventFields.add(EventField.PAID);
+        }
+
+        if (!Objects.isNull(updatedEvent.getRequestModeration())) {
+            eventFields.add(EventField.REQUEST_MODERATION);
+        }
+        if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
+            correctionService.saveCorrectionForEditedFields(eventId, eventFields, CorrectionAuthor.ADMIN);
+        }
+
         Event eventForSave = eventMapper.fromUpdatedByAdmin(event, updatedEvent);
         EventLifeState changedState = eventForSave.getState();
         if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
             eventForSave.setPublishedOn(LocalDateTime.now());
         }
+
         return eventMapper.toFullDto(eventRepository.save(eventForSave));
     }
 

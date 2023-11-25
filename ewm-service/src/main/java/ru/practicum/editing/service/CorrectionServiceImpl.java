@@ -17,7 +17,6 @@ import ru.practicum.editing.storage.CorrectionSpecification;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.EventLifeState;
-import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.BadRequestException;
@@ -44,8 +43,6 @@ public class CorrectionServiceImpl implements CorrectionService {
 
     private final CorrectionMapper correctionMapper;
 
-    private final EventMapper eventMapper;
-
     private final ApiError apiErrorConflict = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
             "For the requested operation the conditions are not met.",
             "", LocalDateTime.now());
@@ -66,11 +63,12 @@ public class CorrectionServiceImpl implements CorrectionService {
     public List<CorrectionDto> getCorrectionForEvent(Long userId, Long eventId,
                                                      List<EventField> eventFields,
                                                      List<RevisionState> revisionStates) {
+        log.info("Get corrections from userId={} to eventId={}", userId, eventId);
         checkUserExistence(userId);
         checkEventExistence(eventId);
         checkUserEvent(userId, eventId);
-      return   correctionMapper
-              .toDtos(correctionRepository.findAll(correctionSpecification.get(eventId,eventFields,revisionStates)));
+        return correctionMapper
+                .toDtos(correctionRepository.findAll(correctionSpecification.get(eventId, eventFields, revisionStates)));
     }
 
     @Override
@@ -78,12 +76,14 @@ public class CorrectionServiceImpl implements CorrectionService {
                                                           List<EventField> eventFields,
                                                           List<RevisionState> revisionStates) {
         checkEventExistence(eventId);
-        return   correctionMapper
-                .toDtos(correctionRepository.findAll(correctionSpecification.get(eventId,eventFields,revisionStates)));
+        log.info("Get corrections by admin to eventId={}", eventId);
+        return correctionMapper
+                .toDtos(correctionRepository.findAll(correctionSpecification.get(eventId, eventFields, revisionStates)));
     }
 
     @Override
     public List<CorrectionDto> postNotesByAdmin(Long eventId, NewCorrectionDtos correctionDtos) {
+        log.info("Post notes by admin to eventId={}", eventId);
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventStatus(event.getState());
@@ -92,7 +92,9 @@ public class CorrectionServiceImpl implements CorrectionService {
         List<Correction> corrections = new ArrayList<>();
         for (NewCorrectionDto newCorrection : notesFromAdmin) {
             EventField eventField = newCorrection.getEventField();
+            log.info("          Event field = {}", eventField);
             Boolean repeated = correctionRepository.existsByEventIdAndEventField(eventId, eventField);
+            log.info("          Repeated correction - {}", repeated);
             Correction correction = (Boolean.TRUE.equals(repeated)
                     ? correctionRepository.findByEventIdAndEventField(eventId, eventField)
                     : new Correction());
@@ -107,6 +109,7 @@ public class CorrectionServiceImpl implements CorrectionService {
             }
             correction.setAfter(fieldContent);
             correction.setState(Boolean.TRUE.equals(repeated) ? RevisionState.REPEATED : RevisionState.INITIAL);
+            log.info("                  Correction = {}", newCorrection);
             corrections.add(correction);
         }
 
@@ -115,6 +118,7 @@ public class CorrectionServiceImpl implements CorrectionService {
 
     @Override
     public void saveCorrectionForEditedFields(Long eventId, List<EventField> fields, CorrectionAuthor author) {
+        log.info("Save correction after fields editing");
         List<Correction> corrections = new ArrayList<>();
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
@@ -127,22 +131,45 @@ public class CorrectionServiceImpl implements CorrectionService {
                 correction.setAfter(fieldContent);
                 correction.setState(RevisionState.EDITED);
                 correction.setCorrectionAuthor(author);
+                log.info("                  Event field = {}", eventField);
+                log.info("                  Correction  = {}", correction);
                 corrections.add(correction);
             }
         }
         correctionRepository.saveAll(corrections);
     }
 
-
     @Override
     @Transactional
     public List<CorrectionDto> reviewCorrectionByAdmin(Long eventId,
                                                        List<EventField> eventFields) {
+        log.info("Set corrections resolved for eventId={}", eventId);
         checkEventExistence(eventId);
-        checkCorrectionsExists(eventId, eventFields);
-        List<Correction> corrections = correctionRepository.findAllByEventFields(eventFields);
+        if (Objects.isNull(eventFields) || eventFields.isEmpty()) {
+            apiErrorBadRequest.setMessage("Bad corrections list");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
+        }
+        eventFields.forEach(e -> checkCorrectionExists(eventId, e));
+        List<Correction> corrections = correctionRepository.findAllByEventFieldsAndEventId(eventFields, eventId);
         corrections.forEach(c -> c.setState(RevisionState.RESOLVED));
+        List<Correction> allCorrectionForEvent = correctionRepository.findAllByEventId(eventId);
+        boolean resolved = true;
+        for (Correction correction : allCorrectionForEvent) {
+            if (!Objects.equals(correction.getState(), RevisionState.RESOLVED)) {
+                resolved = false;
+                break;
+            }
+        }
+        if (resolved) {
+            Event event = eventRepository.findById(eventId).get();
+            event.setState(EventLifeState.PUBLISHED);
+            eventRepository.save(event);
+            log.info("Event published, id = {}", eventId);
 
+            correctionRepository.deleteAll(allCorrectionForEvent);
+            log.info("All corrections deleted");
+        }
         return correctionMapper.toDtos(correctionRepository.saveAll(corrections));
     }
 
@@ -154,13 +181,14 @@ public class CorrectionServiceImpl implements CorrectionService {
         }
     }
 
-    private void checkCorrectionsExists(Long eventId, List<EventField> eventFields) {
-        if (!correctionRepository.existsByEventIdAndEventFields(eventId, eventFields)) {
+    private void checkCorrectionExists(Long eventId, EventField eventFields) {
+        if (Boolean.FALSE.equals(correctionRepository.existsByEventIdAndEventField(eventId, eventFields))) {
             apiErrorConflict.setMessage("Bad field list");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
             throw new BadRequestException(apiErrorBadRequest);
         }
     }
+
     private void checkEventStatus(EventLifeState state) {
         if (!Objects.equals(state, EventLifeState.NOTED)) {
             apiErrorConflict.setMessage("Event life status = " + state + ", cannot be corrected.");

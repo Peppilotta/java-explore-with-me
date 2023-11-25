@@ -153,9 +153,16 @@ public class EventMapper {
         }
 
         if (!Objects.isNull(eventUpdate.getStateAction())) {
-            event.setState(Objects.equals(eventUpdate.getStateAction(), StateAction.PUBLISH_EVENT)
-                    ? EventLifeState.PUBLISHED
-                    : EventLifeState.CANCELED);
+            StateAction stateAction = eventUpdate.getStateAction();
+            if (Objects.equals(stateAction,StateAction.PUBLISH_EVENT)) {
+                event.setState(EventLifeState.PUBLISHED);
+            }
+            if (Objects.equals(stateAction,StateAction.REJECT_EVENT)) {
+                event.setState(EventLifeState.CANCELED);
+            }
+            if (Objects.equals(stateAction,StateAction.GET_NOTED)) {
+                event.setState(EventLifeState.NOTED);
+            }
         }
 
         if (!Objects.isNull(eventUpdate.getTitle())) {
