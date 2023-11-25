@@ -9,7 +9,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
         format_sql: true
-    show-sql: true
+        show-sql: false
   sql:
     init:
       mode: always
