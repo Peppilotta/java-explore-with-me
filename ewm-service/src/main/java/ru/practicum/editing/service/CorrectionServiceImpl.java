@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.category.model.Category;
 import ru.practicum.editing.dto.CorrectionAuthor;
 import ru.practicum.editing.dto.CorrectionDto;
 import ru.practicum.editing.dto.CorrectionMapper;
@@ -227,7 +228,10 @@ public class CorrectionServiceImpl implements CorrectionService {
                 return event.getDescription();
             }
             case CATEGORY: {
-                return event.getCategory().toString();
+                Category category = event.getCategory();
+                String categoryToString = "id=" + category.getId() +
+                        "name=" + category.getName();
+                return categoryToString;
             }
             case EVENT_DATE: {
                 return event.getEventDate().toString();

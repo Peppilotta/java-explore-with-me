@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
@@ -50,7 +49,7 @@ public class EventControllerPrivate {
             @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.ASC, EVENT_ID_FIELD_NAME));
-        return eventService.getEvents(userId, pageable);
+        return eventService.getEventsByUser(userId, pageable);
     }
 
     @PostMapping
@@ -64,7 +63,7 @@ public class EventControllerPrivate {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEvent(@PathVariable @Positive Long userId,
                                  @PathVariable @Positive Long eventId) {
-        return eventService.getEvent(userId, eventId);
+        return eventService.getEventByUser(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
@@ -72,7 +71,7 @@ public class EventControllerPrivate {
     public EventFullDto updateEvent(@PathVariable @Positive Long userId,
                                     @PathVariable @Positive Long eventId,
                                     @RequestBody @Valid final UpdateEventUserRequest event) {
-        return eventService.updateEvent(userId, eventId, event);
+        return eventService.updateEventByUser(userId, eventId, event);
     }
 
     @GetMapping("/{eventId}/requests")

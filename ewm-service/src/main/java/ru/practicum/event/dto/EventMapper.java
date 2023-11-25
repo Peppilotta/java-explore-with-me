@@ -12,6 +12,7 @@ import ru.practicum.request.dto.RequestStatus;
 import ru.practicum.request.storage.RequestRepository;
 import ru.practicum.user.dto.UserMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -99,7 +100,7 @@ public class EventMapper {
         return eventFullDto;
     }
 
-    public Event fromUpdatedByUser(Event event, UpdateEventUserRequest eventUpdate) {
+    public Event fromUpdated(Event event, UpdateEventRequest eventUpdate) {
         if (!Objects.isNull(eventUpdate.getAnnotation())) {
             event.setAnnotation(eventUpdate.getAnnotation());
         }
@@ -118,12 +119,6 @@ public class EventMapper {
 
         if (!Objects.isNull(eventUpdate.getRequestModeration())) {
             event.setRequestModeration(eventUpdate.getRequestModeration());
-        }
-
-        if (!Objects.isNull(eventUpdate.getReviewAction())) {
-            event.setState(Objects.equals(eventUpdate.getReviewAction(), ReviewAction.CANCEL_REVIEW)
-                    ? EventLifeState.CANCELED
-                    : EventLifeState.PENDING);
         }
 
         if (!Objects.isNull(eventUpdate.getTitle())) {
@@ -132,42 +127,38 @@ public class EventMapper {
         return event;
     }
 
-    public Event fromUpdatedByAdmin(Event event, UpdateEventAdminRequest eventUpdate) {
-        if (!Objects.isNull(eventUpdate.getAnnotation())) {
-            event.setAnnotation(eventUpdate.getAnnotation());
-        }
+    public Event fromUpdatedByUser(Event event, UpdateEventUserRequest eventUpdate) {
 
-        if (!Objects.isNull(eventUpdate.getDescription())) {
-            event.setDescription(eventUpdate.getDescription());
-        }
-
-        if (!Objects.isNull(eventUpdate.getPaid())) {
-            event.setPaid(eventUpdate.getPaid());
-        }
-        if (!Objects.isNull(eventUpdate.getParticipantLimit())) {
-            event.setParticipantLimit(eventUpdate.getParticipantLimit());
-        }
-
-        if (!Objects.isNull(eventUpdate.getRequestModeration())) {
-            event.setRequestModeration(eventUpdate.getRequestModeration());
-        }
+        Event updated = fromUpdated(event, eventUpdate);
 
         if (!Objects.isNull(eventUpdate.getStateAction())) {
+            updated.setState(Objects.equals(eventUpdate.getStateAction(), ReviewAction.CANCEL_REVIEW)
+                    ? EventLifeState.CANCELED
+                    : EventLifeState.PENDING);
+        }
+        return updated;
+    }
+
+    public Event fromUpdatedByAdmin(Event event, UpdateEventAdminRequest eventUpdate) {
+        Event updated = fromUpdated(event, eventUpdate);
+        EventLifeState initialState = event.getState();
+
+        EventLifeState state = EventLifeState.PUBLISHED;
+        if (!Objects.isNull(eventUpdate.getStateAction())) {
             StateAction stateAction = eventUpdate.getStateAction();
-            if (Objects.equals(stateAction,StateAction.PUBLISH_EVENT)) {
-                event.setState(EventLifeState.PUBLISHED);
+            if (Objects.equals(stateAction, StateAction.REJECT_EVENT)) {
+                state = EventLifeState.CANCELED;
             }
-            if (Objects.equals(stateAction,StateAction.REJECT_EVENT)) {
-                event.setState(EventLifeState.CANCELED);
+            if (Objects.equals(stateAction, StateAction.GET_NOTED)) {
+                state = EventLifeState.NOTED;
             }
-            if (Objects.equals(stateAction,StateAction.GET_NOTED)) {
-                event.setState(EventLifeState.NOTED);
-            }
+            updated.setState(state);
+        }
+        EventLifeState changedState = event.getState();
+        if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
+            event.setPublishedOn(LocalDateTime.now());
         }
 
-        if (!Objects.isNull(eventUpdate.getTitle())) {
-            event.setTitle(eventUpdate.getTitle());
-        }
         return event;
     }
 }

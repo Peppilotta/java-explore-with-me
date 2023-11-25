@@ -20,6 +20,7 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.StateAction;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.UpdateEventRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
@@ -88,13 +89,41 @@ public class EventServicePrivateAdminImpl implements EventService {
             "Incorrectly made request.", "", LocalDateTime.now());
 
     @Override
-    public List<EventShortDto> getEvents(Long userId, Pageable pageable) {
+    public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
         log.info("Get events of user with id={}", userId);
         checkUserExistence(userId);
         return eventRepository.findAllByUserId(userId, pageable)
                 .stream()
                 .map(eventMapper::toShortDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
+        log.info("Request for list Events according parameters {}", parameters);
+        checkUsersInParameters(parameters.getUsers());
+        checkCategoriesInParameters(parameters.getCategories());
+        return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
+                .stream()
+                .map(eventMapper::toFullDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public EventFullDto getEventByUser(Long userId, Long eventId) {
+        log.info("Get request for events of user with id={}", userId);
+        checkUserExistence(userId);
+        checkEventExistence(eventId);
+        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        checkUserEvent(userId, event.getInitiator().getId());
+        return eventMapper.toFullDto(event);
+    }
+
+    @Override
+    public EventFullDto getEventByAdmin(Long eventId) {
+        log.info("Get request for  Event id = {}", eventId);
+        checkEventExistence(eventId);
+        return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
     }
 
     @Override
@@ -118,52 +147,52 @@ public class EventServicePrivateAdminImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEvent(Long userId, Long eventId) {
-        log.info("Get request for events of user with id={}", userId);
-        checkUserExistence(userId);
-        checkEventExistence(eventId);
-        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        checkUserEvent(userId, event.getInitiator().getId());
-        return eventMapper.toFullDto(event);
-    }
-
-    @Override
     @Transactional
-    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventUpdate) {
+    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updates) {
         log.info("Update request of user with id={} for event with id={} and updates = {}",
-                userId, eventId, eventUpdate);
+                userId, eventId, updates);
         checkUserExistence(userId);
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventStatus(event.getState());
         checkUserEvent(userId, event.getInitiator().getId());
-        UserShortDto initiator = eventUpdate.getInitiator();
+
+        UserShortDto initiator = updates.getInitiator();
         if (!Objects.isNull(initiator)) {
             checkUserEvent(userId, initiator.getId());
             event.setInitiator(userMapper.fromShort(initiator));
         }
 
-        Long categoryId = eventUpdate.getCategory();
-        if (!Objects.isNull(categoryId)) {
-            checkCategoryExistence(categoryId);
-            event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
-        }
+        Event updatedCategoryDateLocation = updateCategoryDateLocation(event, updates);
 
-        LocalDateTime date = eventUpdate.getEventDate();
-        if (!Objects.isNull(date)) {
-            checkEventTime(date);
-            event.setEventDate(date);
+        Event saved = eventRepository.save(eventMapper.fromUpdatedByUser(updatedCategoryDateLocation, updates));
+
+        if (Objects.equals(saved.getState(), EventLifeState.NOTED)) {
+            log.debug("     Send updates to corrections by user");
+            correctionService.saveCorrectionForEditedFields(eventId, getUpdatedFields(updates), CorrectionAuthor.USER);
         }
-        LocationDto locationDto = eventUpdate.getLocation();
-        if (!Objects.isNull(locationDto)) {
-            event.setLocation(saveTestedLocation(locationDto));
-        }
+        return eventMapper.toFullDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updates) {
+        log.info("Update event with id={} by admin. Updates = {}", eventId, updates);
+        checkEventExistence(eventId);
+        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        checkStateForAdminUpdate(updates.getStateAction(), event.getState());
+
+        Event updatedCategoryDateLocation = updateCategoryDateLocation(event, updates);
+
+        Event saved = eventRepository.save(eventMapper.fromUpdatedByAdmin(updatedCategoryDateLocation, updates));
 
         if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
-            log.debug("     Send updates to corrections by user");
-          //  correctionService.saveCorrectionForEditedFields(eventId, getUpdatedFields(eventUpdate), CorrectionAuthor.USER);
+            log.debug("     Send updates to corrections by Admin");
+
+            correctionService.saveCorrectionForEditedFields(eventId,
+                    getUpdatedFields(updates), CorrectionAuthor.ADMIN);
         }
-        return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));
+        return eventMapper.toFullDto(saved);
     }
 
     @Override
@@ -236,65 +265,27 @@ public class EventServicePrivateAdminImpl implements EventService {
                 requestMapper.toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED)));
     }
 
-    @Override
-    public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
-        log.info("Request for list Events according parameters {}", parameters);
-        checkUsersInParameters(parameters.getUsers());
-        checkCategoriesInParameters(parameters.getCategories());
-        return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
-                .stream()
-                .map(eventMapper::toFullDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public EventFullDto getEventByAdmin(Long eventId) {
-        log.info("Get request for  Event id = {}", eventId);
-        checkEventExistence(eventId);
-        return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
-    }
-
-    @Override
-    @Transactional
-    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
-        log.info("Update event with id={} by admin. Updates = {}", eventId, updatedEvent);
-        checkEventExistence(eventId);
-        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        EventLifeState initialState = event.getState();
-        checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());
-        Long categoryId = updatedEvent.getCategory();
+    private Event updateCategoryDateLocation(Event event, UpdateEventRequest updates) {
+        Long categoryId = updates.getCategory();
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
         }
 
-        LocalDateTime eventDate = updatedEvent.getEventDate();
-        if (!Objects.isNull(eventDate)) {
-            checkEventTime(eventDate);
-            event.setEventDate(eventDate);
+        LocalDateTime date = updates.getEventDate();
+        if (!Objects.isNull(date)) {
+            checkEventTime(date);
+            event.setEventDate(date);
         }
-
-        LocationDto locationDto = updatedEvent.getLocation();
+        LocationDto locationDto = updates.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
         }
-        if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
-            log.debug("     Send updates to corrections by Admin");
 
-            correctionService.saveCorrectionForEditedFields(eventId,
-                    getUpdatedFields(updatedEvent), CorrectionAuthor.ADMIN);
-        }
-
-        Event eventForSave = eventMapper.fromUpdatedByAdmin(event, updatedEvent);
-        EventLifeState changedState = eventForSave.getState();
-        if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
-            eventForSave.setPublishedOn(LocalDateTime.now());
-        }
-
-        return eventMapper.toFullDto(eventRepository.save(eventForSave));
+        return event;
     }
 
-    private List<EventField> getUpdatedFields(UpdateEventAdminRequest updatedEvent) {
+    private List<EventField> getUpdatedFields(UpdateEventRequest updatedEvent) {
         List<EventField> eventFields = new ArrayList<>();
 
         if (!Objects.isNull(updatedEvent.getCategory())) {
