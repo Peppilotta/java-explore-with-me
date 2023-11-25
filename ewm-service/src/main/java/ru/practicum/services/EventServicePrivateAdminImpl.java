@@ -117,14 +117,6 @@ public class EventServicePrivateAdminImpl implements EventService {
                 category)));
     }
 
-    private void checkLocation(LocationDto locationDto) {
-        if (Objects.isNull(locationDto.getLat()) || Objects.isNull(locationDto.getLon())) {
-            apiErrorBadRequest.setMessage("Bad location field ");
-            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
-            throw new BadRequestException(apiErrorBadRequest);
-        }
-    }
-
     @Override
     public EventFullDto getEvent(Long userId, Long eventId) {
         log.info("Get request for events of user with id={}", userId);
@@ -145,7 +137,6 @@ public class EventServicePrivateAdminImpl implements EventService {
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventStatus(event.getState());
         checkUserEvent(userId, event.getInitiator().getId());
-        List<EventField> eventFields = new ArrayList<>();
         UserShortDto initiator = eventUpdate.getInitiator();
         if (!Objects.isNull(initiator)) {
             checkUserEvent(userId, initiator.getId());
@@ -156,42 +147,21 @@ public class EventServicePrivateAdminImpl implements EventService {
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
-            eventFields.add(EventField.CATEGORY);
         }
 
         LocalDateTime date = eventUpdate.getEventDate();
         if (!Objects.isNull(date)) {
             checkEventTime(date);
             event.setEventDate(date);
-            eventFields.add(EventField.EVENT_DATE);
         }
         LocationDto locationDto = eventUpdate.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
-            eventFields.add(EventField.LOCATION);
         }
 
-        if (!Objects.isNull(eventUpdate.getAnnotation())) {
-            eventFields.add(EventField.ANNOTATION);
-        }
-
-        if (!Objects.isNull(eventUpdate.getDescription())) {
-            eventFields.add(EventField.DESCRIPTION);
-        }
-
-        if (!Objects.isNull(eventUpdate.getParticipantLimit())) {
-            eventFields.add(EventField.PARTICIPANT_LIMIT);
-        }
-
-        if (!Objects.isNull(eventUpdate.getPaid())) {
-            eventFields.add(EventField.PAID);
-        }
-
-        if (!Objects.isNull(eventUpdate.getRequestModeration())) {
-            eventFields.add(EventField.REQUEST_MODERATION);
-        }
         if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
-            correctionService.saveCorrectionForEditedFields(eventId, eventFields, CorrectionAuthor.USER);
+            log.debug("     Send updates to corrections by user");
+          //  correctionService.saveCorrectionForEditedFields(eventId, getUpdatedFields(eventUpdate), CorrectionAuthor.USER);
         }
         return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));
     }
@@ -279,6 +249,7 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     @Override
     public EventFullDto getEventByAdmin(Long eventId) {
+        log.info("Get request for  Event id = {}", eventId);
         checkEventExistence(eventId);
         return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
     }
@@ -291,26 +262,53 @@ public class EventServicePrivateAdminImpl implements EventService {
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         EventLifeState initialState = event.getState();
         checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());
-        List<EventField> eventFields = new ArrayList<>();
         Long categoryId = updatedEvent.getCategory();
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
-            eventFields.add(EventField.CATEGORY);
         }
 
         LocalDateTime eventDate = updatedEvent.getEventDate();
         if (!Objects.isNull(eventDate)) {
             checkEventTime(eventDate);
             event.setEventDate(eventDate);
-            eventFields.add(EventField.EVENT_DATE);
         }
 
         LocationDto locationDto = updatedEvent.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
+        }
+        if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
+            log.debug("     Send updates to corrections by Admin");
+
+            correctionService.saveCorrectionForEditedFields(eventId,
+                    getUpdatedFields(updatedEvent), CorrectionAuthor.ADMIN);
+        }
+
+        Event eventForSave = eventMapper.fromUpdatedByAdmin(event, updatedEvent);
+        EventLifeState changedState = eventForSave.getState();
+        if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
+            eventForSave.setPublishedOn(LocalDateTime.now());
+        }
+
+        return eventMapper.toFullDto(eventRepository.save(eventForSave));
+    }
+
+    private List<EventField> getUpdatedFields(UpdateEventAdminRequest updatedEvent) {
+        List<EventField> eventFields = new ArrayList<>();
+
+        if (!Objects.isNull(updatedEvent.getCategory())) {
+            eventFields.add(EventField.CATEGORY);
+        }
+
+        if (!Objects.isNull(updatedEvent.getEventDate())) {
+            eventFields.add(EventField.EVENT_DATE);
+        }
+
+        if (!Objects.isNull(updatedEvent.getLocation())) {
             eventFields.add(EventField.LOCATION);
         }
+
         if (!Objects.isNull(updatedEvent.getAnnotation())) {
             eventFields.add(EventField.ANNOTATION);
         }
@@ -330,23 +328,21 @@ public class EventServicePrivateAdminImpl implements EventService {
         if (!Objects.isNull(updatedEvent.getRequestModeration())) {
             eventFields.add(EventField.REQUEST_MODERATION);
         }
-        if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
-            correctionService.saveCorrectionForEditedFields(eventId, eventFields, CorrectionAuthor.ADMIN);
-        }
-
-        Event eventForSave = eventMapper.fromUpdatedByAdmin(event, updatedEvent);
-        EventLifeState changedState = eventForSave.getState();
-        if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
-            eventForSave.setPublishedOn(LocalDateTime.now());
-        }
-
-        return eventMapper.toFullDto(eventRepository.save(eventForSave));
+        return eventFields;
     }
 
     private List<Request> changeStatusForRequests(List<Long> requestIds, RequestStatus status) {
         List<Request> requests = requestRepository.findAllByIds(requestIds);
         requests.forEach(r -> r.setStatus(status));
         return requestRepository.saveAll(requests);
+    }
+
+    private void checkLocation(LocationDto locationDto) {
+        if (Objects.isNull(locationDto.getLat()) || Objects.isNull(locationDto.getLon())) {
+            apiErrorBadRequest.setMessage("Bad location field ");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
+        }
     }
 
     private void checkUpdates(List<Long> requestIds, RequestStatus newStatus) {

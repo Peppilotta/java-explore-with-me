@@ -3,10 +3,10 @@ package ru.practicum.editing.service;
 import ru.practicum.editing.dto.CorrectionAuthor;
 import ru.practicum.editing.dto.CorrectionDto;
 import ru.practicum.editing.dto.EventField;
-import ru.practicum.editing.dto.NewCorrectionDtos;
 import ru.practicum.editing.dto.RevisionState;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CorrectionService {
 
@@ -18,7 +18,7 @@ public interface CorrectionService {
                                                    List<EventField> eventFields,
                                                    List<RevisionState> revisionStates);
 
-    List<CorrectionDto> postNotesByAdmin(Long eventId, NewCorrectionDtos correctionDto);
+    List<CorrectionDto> postNotesByAdmin(Long eventId, Map<String, String> correctionDto);
 
     void saveCorrectionForEditedFields(Long eventId, List<EventField> fields, CorrectionAuthor author);
 

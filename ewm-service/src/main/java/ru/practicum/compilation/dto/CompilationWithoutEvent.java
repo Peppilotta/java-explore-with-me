@@ -1,4 +1,4 @@
-package ru.practicum.editing.dto;
+package ru.practicum.compilation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,20 +8,22 @@ import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Positive;
 
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
-public class NewCorrectionDto {
+@AllArgsConstructor
+public class CompilationWithoutEvent {
+    @NotNull
+    @Positive
+    private Long id;
+
+    @NotNull
+    private Boolean pinned;
 
     @NotNull
     @NotBlank
-    private String eventField;
-
-    @NotNull
-    @Size(min = 5, max = 7000, message = "Size of content must be between {min} and {max}")
-    private String content;
+    private String title;
 }

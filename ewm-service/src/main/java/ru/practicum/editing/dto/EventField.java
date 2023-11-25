@@ -11,7 +11,8 @@ public enum EventField {
     PAID("PAID"),
     PARTICIPANT_LIMIT("PARTICIPANT_LIMIT"),
     REQUEST_MODERATION("REQUEST_MODERATION"),
-    TITLE("TITLE");
+    TITLE("TITLE"),
+    NOT_FOUND("NOT_FOUND");
 
     private final String value;
 
@@ -26,6 +27,15 @@ public enum EventField {
             }
         }
         return false;
+    }
+
+    public static EventField findByName(String sort) {
+        for (EventField eventField : values()) {
+            if (Objects.equals(eventField.name(), sort)) {
+                return eventField;
+            }
+        }
+        return EventField.NOT_FOUND;
     }
 
     public String getValue() {

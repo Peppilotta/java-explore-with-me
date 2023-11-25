@@ -120,8 +120,8 @@ public class EventMapper {
             event.setRequestModeration(eventUpdate.getRequestModeration());
         }
 
-        if (!Objects.isNull(eventUpdate.getStateAction())) {
-            event.setState(Objects.equals(eventUpdate.getStateAction(), ReviewAction.CANCEL_REVIEW)
+        if (!Objects.isNull(eventUpdate.getReviewAction())) {
+            event.setState(Objects.equals(eventUpdate.getReviewAction(), ReviewAction.CANCEL_REVIEW)
                     ? EventLifeState.CANCELED
                     : EventLifeState.PENDING);
         }

@@ -38,14 +38,14 @@ public class CorrectionSpecification {
 
             predicates.add(criteriaBuilder.in(root.get(Correction_.event)).value(eventSubquery));
 
-            if (!Objects.isNull(revisionStates) || !revisionStates.isEmpty()) {
+            if (!revisionStates.isEmpty()) {
                 CriteriaBuilder.In<RevisionState> inAction = criteriaBuilder.in(root.get(Correction_.state));
                 for (RevisionState revisionState : revisionStates) {
                     inAction.value(revisionState);
                 }
                 predicates.add(inAction);
             }
-            if (!Objects.isNull(eventFields) || !eventFields.isEmpty()) {
+            if (!eventFields.isEmpty()) {
                 CriteriaBuilder.In<EventField> inAction = criteriaBuilder.in(root.get(Correction_.eventField));
                 for (EventField eventField : eventFields) {
                     inAction.value(eventField);

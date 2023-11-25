@@ -43,7 +43,7 @@ public class UpdateEventUserRequest {
 
     private Boolean requestModeration;
 
-    private ReviewAction stateAction;
+    private ReviewAction reviewAction;
 
     @Size(min = 3, max = 120, message = "Size of title must be between {min} and {max}")
     private String title;

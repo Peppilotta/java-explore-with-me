@@ -15,11 +15,11 @@ import javax.validation.constraints.Size;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewCorrectionDto {
+public class NewCorrectionDtoWithEnum {
 
     @NotNull
     @NotBlank
-    private String eventField;
+    private EventField eventField;
 
     @NotNull
     @Size(min = 5, max = 7000, message = "Size of content must be between {min} and {max}")

@@ -15,7 +15,9 @@ import ru.practicum.editing.dto.RevisionState;
 import ru.practicum.editing.service.CorrectionService;
 
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/users/{userId}/corrections/{eventId}")
@@ -31,6 +33,8 @@ public class CorrectionControllerUser {
                                                      @PathVariable @Positive Long eventId,
                                                      @RequestParam(required = false) List<EventField> eventFields,
                                                      @RequestParam(required = false) List<RevisionState> revisionStates) {
-        return correctionService.getCorrectionForEvent(userId, eventId, eventFields, revisionStates);
+        return correctionService.getCorrectionForEvent(userId, eventId,
+                Objects.isNull(eventFields) ? new ArrayList<>() : eventFields,
+                Objects.isNull(revisionStates) ? new ArrayList<>() : revisionStates);
     }
 }

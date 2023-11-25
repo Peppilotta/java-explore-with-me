@@ -44,10 +44,10 @@ public class Correction {
     @Column(name = "admin_note", nullable = false)
     private String adminNote;
 
-    @Column(name = "before", nullable = false)
+    @Column(name = "before_edit", nullable = false)
     private String before;
 
-    @Column(name = "after")
+    @Column(name = "after_edit")
     private String after;
 
     @Column(name = "author", nullable = false, updatable = false)

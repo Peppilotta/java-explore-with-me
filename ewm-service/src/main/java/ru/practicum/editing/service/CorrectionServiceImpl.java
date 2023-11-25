@@ -8,8 +8,7 @@ import ru.practicum.editing.dto.CorrectionAuthor;
 import ru.practicum.editing.dto.CorrectionDto;
 import ru.practicum.editing.dto.CorrectionMapper;
 import ru.practicum.editing.dto.EventField;
-import ru.practicum.editing.dto.NewCorrectionDto;
-import ru.practicum.editing.dto.NewCorrectionDtos;
+import ru.practicum.editing.dto.NewCorrectionDtoWithEnum;
 import ru.practicum.editing.dto.RevisionState;
 import ru.practicum.editing.model.Correction;
 import ru.practicum.editing.storage.CorrectionRepository;
@@ -26,6 +25,7 @@ import ru.practicum.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -82,34 +82,40 @@ public class CorrectionServiceImpl implements CorrectionService {
     }
 
     @Override
-    public List<CorrectionDto> postNotesByAdmin(Long eventId, NewCorrectionDtos correctionDtos) {
+    public List<CorrectionDto> postNotesByAdmin(Long eventId, Map<String, String> correctionDtos) {
         log.info("Post notes by admin to eventId={}", eventId);
         checkEventExistence(eventId);
+
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventStatus(event.getState());
-        List<NewCorrectionDto> notesFromAdmin = correctionDtos.getCorrections();
-        checkNewCorrections(notesFromAdmin);
+        List<NewCorrectionDtoWithEnum> notesFromAdmin = convertAndCheck(correctionDtos);
         List<Correction> corrections = new ArrayList<>();
-        for (NewCorrectionDto newCorrection : notesFromAdmin) {
+        for (NewCorrectionDtoWithEnum newCorrection : notesFromAdmin) {
             EventField eventField = newCorrection.getEventField();
-            log.info("          Event field = {}", eventField);
+            log.debug("          Event field = {}", eventField);
             Boolean repeated = correctionRepository.existsByEventIdAndEventField(eventId, eventField);
-            log.info("          Repeated correction - {}", repeated);
+            log.debug("          Repeated correction - {}", repeated);
             Correction correction = (Boolean.TRUE.equals(repeated)
                     ? correctionRepository.findByEventIdAndEventField(eventId, eventField)
                     : new Correction());
-            StringBuilder before = new StringBuilder();
             String fieldContent = getEventFieldContent(event, eventField);
-            correction.setAdminNote(newCorrection.getContent());
-            correction.setCorrectionAuthor(CorrectionAuthor.ADMIN_ONLY_NOTE);
+
+            correction.setEvent(event);
+
             correction.setEventField(eventField);
+
             correction.setAdminNote(newCorrection.getContent());
-            if (Boolean.TRUE.equals(repeated)) {
-                correction.setBefore(before.append(fieldContent).toString());
+
+            if (!Boolean.TRUE.equals(repeated)) {
+                correction.setBefore(fieldContent);
+                correction.setAfter(fieldContent);
             }
-            correction.setAfter(fieldContent);
+
+            correction.setCorrectionAuthor(CorrectionAuthor.ADMIN_ONLY_NOTE);
+
             correction.setState(Boolean.TRUE.equals(repeated) ? RevisionState.REPEATED : RevisionState.INITIAL);
-            log.info("                  Correction = {}", newCorrection);
+
+            log.debug("                  Correction = {}", newCorrection);
             corrections.add(correction);
         }
 
@@ -131,8 +137,8 @@ public class CorrectionServiceImpl implements CorrectionService {
                 correction.setAfter(fieldContent);
                 correction.setState(RevisionState.EDITED);
                 correction.setCorrectionAuthor(author);
-                log.info("                  Event field = {}", eventField);
-                log.info("                  Correction  = {}", correction);
+                log.debug("                  Event field = {}", eventField);
+                log.debug("                  Correction  = {}", correction);
                 corrections.add(correction);
             }
         }
@@ -143,7 +149,7 @@ public class CorrectionServiceImpl implements CorrectionService {
     @Transactional
     public List<CorrectionDto> reviewCorrectionByAdmin(Long eventId,
                                                        List<EventField> eventFields) {
-        log.info("Set corrections resolved for eventId={}", eventId);
+        log.info("Set corrections RESOLVED for eventId={}", eventId);
         checkEventExistence(eventId);
         if (Objects.isNull(eventFields) || eventFields.isEmpty()) {
             apiErrorBadRequest.setMessage("Bad corrections list");
@@ -161,24 +167,38 @@ public class CorrectionServiceImpl implements CorrectionService {
                 break;
             }
         }
+        List<Correction> output = new ArrayList<>(correctionRepository.saveAll(corrections));
+
         if (resolved) {
             Event event = eventRepository.findById(eventId).get();
             event.setState(EventLifeState.PUBLISHED);
             eventRepository.save(event);
-            log.info("Event published, id = {}", eventId);
+            log.debug("          Event published, id = {}", eventId);
 
             correctionRepository.deleteAll(allCorrectionForEvent);
-            log.info("All corrections deleted");
+            log.debug("          All corrections deleted");
         }
-        return correctionMapper.toDtos(correctionRepository.saveAll(corrections));
+        return correctionMapper.toDtos(output);
     }
 
-    private void checkNewCorrections(List<NewCorrectionDto> corrections) {
+    private List<NewCorrectionDtoWithEnum> convertAndCheck(Map<String, String> corrections) {
         if (Objects.isNull(corrections) || corrections.isEmpty()) {
             apiErrorBadRequest.setMessage("Bad corrections list");
             apiErrorBadRequest.setTimestamp(LocalDateTime.now());
             throw new BadRequestException(apiErrorBadRequest);
         }
+        List<NewCorrectionDtoWithEnum> withEnum = new ArrayList<>();
+        for (String field : corrections.keySet()) {
+            if (EventField.existsByName(field)) {
+                withEnum.add(new NewCorrectionDtoWithEnum(EventField.findByName(field), corrections.get(field)));
+            } else {
+                apiErrorBadRequest.setMessage("Wrong field name = " + field);
+                apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+                throw new BadRequestException(apiErrorBadRequest);
+            }
+        }
+        log.debug("         Fields converted");
+        return withEnum;
     }
 
     private void checkCorrectionExists(Long eventId, EventField eventFields) {
@@ -198,6 +218,7 @@ public class CorrectionServiceImpl implements CorrectionService {
     }
 
     private String getEventFieldContent(Event event, EventField eventField) {
+        log.debug("         Get field content as string");
         switch (eventField) {
             case ANNOTATION: {
                 return event.getAnnotation();
