@@ -1,7 +1,5 @@
 package ru.practicum.editing.dto;
 
-import java.util.Objects;
-
 public enum RevisionState {
 
     INITIAL(""),
@@ -13,15 +11,6 @@ public enum RevisionState {
 
     RevisionState(String value) {
         this.value = value;
-    }
-
-    public static boolean existsByName(String sort) {
-        for (RevisionState revisionState : values()) {
-            if (Objects.equals(revisionState.name(), sort)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public String getValue() {

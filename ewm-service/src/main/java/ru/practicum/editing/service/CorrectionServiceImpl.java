@@ -19,6 +19,7 @@ import ru.practicum.event.dto.EventLifeState;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
 import ru.practicum.exception.BadRequestException;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.storage.UserRepository;
 
@@ -55,11 +56,6 @@ public class CorrectionServiceImpl implements CorrectionService {
             "Incorrectly made request.", "", LocalDateTime.now());
 
     @Override
-    public Long checkEventIsCorrect(Long eventId) {
-        return 0L;
-    }
-
-    @Override
     public List<CorrectionDto> getCorrectionForEvent(Long userId, Long eventId,
                                                      List<EventField> eventFields,
                                                      List<RevisionState> revisionStates) {
@@ -67,6 +63,11 @@ public class CorrectionServiceImpl implements CorrectionService {
         checkUserExistence(userId);
         checkEventExistence(eventId);
         checkUserEvent(userId, eventId);
+
+        if (!Objects.isNull(eventFields) && !eventFields.isEmpty()) {
+            eventFields.forEach(e -> checkCorrectionExists(eventId, e));
+        }
+
         return correctionMapper
                 .toDtos(correctionRepository.findAll(correctionSpecification.get(eventId, eventFields, revisionStates)));
     }
@@ -76,6 +77,10 @@ public class CorrectionServiceImpl implements CorrectionService {
                                                           List<EventField> eventFields,
                                                           List<RevisionState> revisionStates) {
         checkEventExistence(eventId);
+        if (!Objects.isNull(eventFields) && !eventFields.isEmpty()) {
+            eventFields.forEach(e -> checkCorrectionExists(eventId, e));
+        }
+
         log.info("Get corrections by admin to eventId={}", eventId);
         return correctionMapper
                 .toDtos(correctionRepository.findAll(correctionSpecification.get(eventId, eventFields, revisionStates)));
@@ -92,6 +97,7 @@ public class CorrectionServiceImpl implements CorrectionService {
         List<Correction> corrections = new ArrayList<>();
         for (NewCorrectionDtoWithEnum newCorrection : notesFromAdmin) {
             EventField eventField = newCorrection.getEventField();
+
             log.debug("          Event field = {}", eventField);
             Boolean repeated = correctionRepository.existsByEventIdAndEventField(eventId, eventField);
             log.debug("          Repeated correction - {}", repeated);
@@ -209,8 +215,8 @@ public class CorrectionServiceImpl implements CorrectionService {
 
     private void checkCorrectionExists(Long eventId, EventField eventFields) {
         if (Boolean.FALSE.equals(correctionRepository.existsByEventIdAndEventField(eventId, eventFields))) {
-            apiErrorConflict.setMessage("Bad field list");
-            apiErrorConflict.setTimestamp(LocalDateTime.now());
+            apiErrorBadRequest.setMessage("Bad field list");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
             throw new BadRequestException(apiErrorBadRequest);
         }
     }
@@ -219,7 +225,7 @@ public class CorrectionServiceImpl implements CorrectionService {
         if (!Objects.equals(state, EventLifeState.NOTED)) {
             apiErrorConflict.setMessage("Event life status = " + state + ", cannot be corrected.");
             apiErrorConflict.setTimestamp(LocalDateTime.now());
-            throw new BadRequestException(apiErrorBadRequest);
+            throw new ConflictException(apiErrorConflict);
         }
     }
 

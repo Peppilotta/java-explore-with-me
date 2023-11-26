@@ -36,7 +36,7 @@ public class CorrectionControllerAdmin {
                                                           @RequestParam(required = false) List<EventField> eventFields,
                                                           @RequestParam(required = false) List<RevisionState> revisionStates) {
 
-        return correctionService.getCorrectionForEventAdmin(eventId,                  
+        return correctionService.getCorrectionForEventAdmin(eventId,
                 Objects.isNull(eventFields) ? new ArrayList<>() : eventFields,
                 Objects.isNull(revisionStates) ? new ArrayList<>() : revisionStates);
     }

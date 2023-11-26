@@ -29,13 +29,13 @@ public class CorrectionSpecification {
             log.debug("Into Specification parameters for correction");
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
 
-            Subquery<Event> eventSubquery = criteriaQuery.subquery(Event.class);
-            Root<Event> userRoot = eventSubquery.from(Event.class);
-            eventSubquery.select(userRoot)
+            Subquery<Event> eventSubQuery = criteriaQuery.subquery(Event.class);
+            Root<Event> userRoot = eventSubQuery.from(Event.class);
+            eventSubQuery.select(userRoot)
                     .distinct(true)
                     .where(criteriaBuilder.equal(userRoot.get(Event_.id), (eventId)));
 
-            predicates.add(criteriaBuilder.in(root.get(Correction_.event)).value(eventSubquery));
+            predicates.add(criteriaBuilder.in(root.get(Correction_.event)).value(eventSubQuery));
 
             if (!revisionStates.isEmpty()) {
                 CriteriaBuilder.In<RevisionState> inAction = criteriaBuilder.in(root.get(Correction_.state));

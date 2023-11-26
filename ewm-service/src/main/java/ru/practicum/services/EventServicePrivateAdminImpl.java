@@ -167,7 +167,7 @@ public class EventServicePrivateAdminImpl implements EventService {
 
         Event saved = eventRepository.save(eventMapper.fromUpdatedByUser(updatedCategoryDateLocation, updates));
 
-        if (Objects.equals(saved.getState(), EventLifeState.NOTED)) {
+        if (Objects.equals(saved.getState(), EventLifeState.NOTED) && Objects.isNull(updates.getStateAction())) {
             log.debug("     Send updates to corrections by user");
             correctionService.saveCorrectionForEditedFields(eventId, getUpdatedFields(updates), CorrectionAuthor.USER);
         }

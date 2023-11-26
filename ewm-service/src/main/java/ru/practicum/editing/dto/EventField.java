@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public enum EventField {
     ANNOTATION("ANNOTATION"),
-    DESCRIPTION ("DESCRIPTION"),
+    DESCRIPTION("DESCRIPTION"),
     CATEGORY("CATEGORY"),
     EVENT_DATE("EVENT_DATE"),
     LOCATION("LOCATION"),

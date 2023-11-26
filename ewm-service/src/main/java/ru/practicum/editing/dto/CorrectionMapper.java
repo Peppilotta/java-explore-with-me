@@ -30,5 +30,4 @@ public class CorrectionMapper {
     public List<CorrectionDto> toDtos(List<Correction> corrections) {
         return corrections.stream().map(this::toDto).collect(Collectors.toList());
     }
-
 }

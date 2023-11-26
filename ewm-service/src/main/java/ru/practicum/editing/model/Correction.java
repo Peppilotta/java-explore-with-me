@@ -50,9 +50,8 @@ public class Correction {
     @Column(name = "after_edit")
     private String after;
 
-    @Column(name = "author", nullable = false, updatable = false)
+    @Column(name = "author", nullable = false)
     private CorrectionAuthor correctionAuthor;
-
 
     @Column(name = "revision_state")
     private RevisionState state;

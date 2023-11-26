@@ -24,6 +24,4 @@ public interface CorrectionService {
 
     List<CorrectionDto> reviewCorrectionByAdmin(Long eventId,
                                                 List<EventField> eventFields);
-
-    Long checkEventIsCorrect(Long eventId);
 }
