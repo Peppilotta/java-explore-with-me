@@ -17,7 +17,6 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -27,7 +26,7 @@ public class CorrectionSpecification {
                                          List<RevisionState> revisionStates) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            log.info("Into Specification parameters for correction");
+            log.debug("Into Specification parameters for correction");
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
 
             Subquery<Event> eventSubquery = criteriaQuery.subquery(Event.class);

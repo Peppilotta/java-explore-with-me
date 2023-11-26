@@ -37,4 +37,9 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private List<Event> events;
+
+    @Override
+    public String toString() {
+        return "Category{id=" + id + ", name=" + name + "}";
+    }
 }

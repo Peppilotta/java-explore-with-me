@@ -1,6 +1,7 @@
 package ru.practicum.event.dto;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.model.Category;
@@ -18,6 +19,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class EventMapper {
 
@@ -130,11 +132,16 @@ public class EventMapper {
     public Event fromUpdatedByUser(Event event, UpdateEventUserRequest eventUpdate) {
 
         Event updated = fromUpdated(event, eventUpdate);
+        ReviewAction updatedAction = eventUpdate.getStateAction();
 
-        if (!Objects.isNull(eventUpdate.getStateAction())) {
-            updated.setState(Objects.equals(eventUpdate.getStateAction(), ReviewAction.CANCEL_REVIEW)
-                    ? EventLifeState.CANCELED
-                    : EventLifeState.PENDING);
+        if (!Objects.isNull(updatedAction)) {
+            log.debug("        ReviewAction is not null ");
+            if (Objects.equals(eventUpdate.getStateAction(), ReviewAction.CANCEL_REVIEW)) {
+                updated.setState(EventLifeState.CANCELED);
+            }
+            if (Objects.equals(eventUpdate.getStateAction(), ReviewAction.SEND_TO_REVIEW)) {
+                updated.setState(EventLifeState.PENDING);
+            }
         }
         return updated;
     }

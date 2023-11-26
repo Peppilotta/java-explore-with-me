@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.category.model.Category;
 import ru.practicum.editing.dto.CorrectionAuthor;
 import ru.practicum.editing.dto.CorrectionDto;
 import ru.practicum.editing.dto.CorrectionMapper;
@@ -126,6 +125,7 @@ public class CorrectionServiceImpl implements CorrectionService {
     @Override
     public void saveCorrectionForEditedFields(Long eventId, List<EventField> fields, CorrectionAuthor author) {
         log.info("Save correction after fields editing");
+        log.debug("              CorrectionAuthor={}", author);
         List<Correction> corrections = new ArrayList<>();
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
@@ -134,10 +134,15 @@ public class CorrectionServiceImpl implements CorrectionService {
                 String fieldContent = getEventFieldContent(event, eventField);
                 Correction correction = correctionRepository.findByEventIdAndEventField(eventId, eventField);
                 String after = correction.getAfter();
+
                 correction.setBefore(after);
+
                 correction.setAfter(fieldContent);
+
                 correction.setState(RevisionState.EDITED);
+
                 correction.setCorrectionAuthor(author);
+
                 log.debug("                  Event field = {}", eventField);
                 log.debug("                  Correction  = {}", correction);
                 corrections.add(correction);
@@ -228,10 +233,7 @@ public class CorrectionServiceImpl implements CorrectionService {
                 return event.getDescription();
             }
             case CATEGORY: {
-                Category category = event.getCategory();
-                String categoryToString = "id=" + category.getId() +
-                        "name=" + category.getName();
-                return categoryToString;
+                return event.getCategory().toString();
             }
             case EVENT_DATE: {
                 return event.getEventDate().toString();

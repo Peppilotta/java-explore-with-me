@@ -32,7 +32,7 @@ public class EventSpecification {
     public Specification<Event> getEventsByParameters(AdminEventsFindParameters findParameters) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            log.info("into Specification parameters for admin");
+            log.debug("Into Specification parameters for admin");
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
 
             List<Long> users = findParameters.getUsers();
@@ -44,7 +44,7 @@ public class EventSpecification {
                         .where(userRoot.get(User_.id).in(users));
 
                 predicates.add(criteriaBuilder.in(root.get(Event_.initiator)).value(userSubQuery));
-                log.info("Users criteria added");
+                log.debug("Users criteria added");
             }
             List<Long> categories = findParameters.getCategories();
             if (!Objects.isNull(categories) && !categories.isEmpty()) {
@@ -56,7 +56,7 @@ public class EventSpecification {
                 predicates.add(criteriaBuilder.in(root.get(Event_.category)).value(categorySubQuery));
                 StringBuilder categoriesToLog = new StringBuilder();
                 categories.forEach(c -> categoriesToLog.append(" id=").append(c));
-                log.info("Categories criteria added. {}", categoriesToLog);
+                log.debug("Categories criteria added. {}", categoriesToLog);
             }
             List<String> states = findParameters.getStates();
             if (!states.isEmpty()) {
@@ -68,17 +68,17 @@ public class EventSpecification {
                 predicates.add(inStates);
                 StringBuilder statesToLog = new StringBuilder();
                 states.forEach(c -> statesToLog.append(" state=").append(c));
-                log.info("States criteria added. {}", statesToLog);
+                log.debug("States criteria added. {}", statesToLog);
             }
 
             LocalDateTime start = findParameters.getRangeStart();
             LocalDateTime end = findParameters.getRangeEnd();
             if (Objects.isNull(end)) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(Event_.eventDate), start));
-                log.info("Time criteria added - only Start");
+                log.debug("Time criteria added - only Start");
             } else {
                 predicates.add(criteriaBuilder.between(root.get(Event_.eventDate), start, end));
-                log.info("Time criteria added - start and end");
+                log.debug("Time criteria added - start and end");
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -88,7 +88,7 @@ public class EventSpecification {
     public Specification<Event> getEventsByParametersPublic(PublicEventsFindParameters findParameters) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            log.info("into Specification parameters for public");
+            log.debug("Into Specification parameters for public");
 
             CriteriaQuery<Event> criteriaQuery = criteriaBuilder.createQuery(Event.class);
             predicates.add(criteriaBuilder.equal(root.get(Event_.state), EventLifeState.PUBLISHED));
@@ -101,7 +101,7 @@ public class EventSpecification {
                             .add(criteriaBuilder.or(
                                     criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), pattern),
                                     criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), pattern)));
-                    log.info("Criteria added: text = {}", text);
+                    log.debug("Criteria added: text = {}", text);
                 }
             }
             List<Long> categories = findParameters.getCategories();
@@ -114,21 +114,21 @@ public class EventSpecification {
                 predicates.add(criteriaBuilder.in(root.get(Event_.category)).value(categorySubQuery));
                 StringBuilder categoriesToLog = new StringBuilder();
                 categories.forEach(c -> categoriesToLog.append(" id=").append(c));
-                log.info("Categories criteria added. {}", categoriesToLog);
+                log.debug("Categories criteria added. {}", categoriesToLog);
             }
             Boolean paid = findParameters.getPaid();
             if (!Objects.isNull(paid)) {
                 predicates.add(criteriaBuilder.equal(root.get(Event_.paid), paid));
-                log.info("Criteria added: paid");
+                log.debug("Criteria added: paid");
             }
             LocalDateTime start = findParameters.getRangeStart();
             LocalDateTime end = findParameters.getRangeEnd();
             if (Objects.isNull(end)) {
                 predicates.add(criteriaBuilder.greaterThan(root.get(Event_.eventDate), start));
-                log.info("Time criteria added - only Start");
+                log.debug("Time criteria added - only Start");
             } else {
                 predicates.add(criteriaBuilder.between(root.get(Event_.eventDate), start, end));
-                log.info("Time criteria added - start and end");
+                log.debug("Time criteria added - start and end");
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
