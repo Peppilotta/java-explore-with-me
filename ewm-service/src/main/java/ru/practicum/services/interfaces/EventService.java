@@ -15,13 +15,13 @@ import java.util.List;
 
 public interface EventService {
 
-    List<EventShortDto> getEvents(Long userId, Pageable pageable);
+    List<EventShortDto> getEventsByUser(Long userId, Pageable pageable);
 
     EventFullDto addEvent(Long userId, NewEventDto event);
 
-    EventFullDto getEvent(Long userId, Long eventId);
+    EventFullDto getEventByUser(Long userId, Long eventId);
 
-    EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest event);
+    EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest event);
 
     List<ParticipationRequestDto> getRequestsForParticipation(Long userId, Long eventId);
 
@@ -33,5 +33,5 @@ public interface EventService {
 
     EventFullDto getEventByAdmin(Long eventId);
 
-    EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest newEvent);
+    EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest newEvent);
 }

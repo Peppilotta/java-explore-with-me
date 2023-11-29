@@ -19,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NewCompilationDto {
 
+    @NotNull(message = "Field: pinned. Error: must not be blank. Value: null")
     private Boolean pinned = false;
 
     @NotNull(message = "Field: title. Error: must not be blank. Value: null")

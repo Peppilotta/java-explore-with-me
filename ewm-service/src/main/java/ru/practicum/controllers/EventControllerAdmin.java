@@ -74,6 +74,6 @@ public class EventControllerAdmin {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto patchEvent(@PathVariable @Positive Long eventId,
                                    @RequestBody @Valid final UpdateEventAdminRequest event) {
-        return service.patchEventByAdmin(eventId, event);
+        return service.updateEventByAdmin(eventId, event);
     }
 }

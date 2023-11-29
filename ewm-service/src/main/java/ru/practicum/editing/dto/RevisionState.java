@@ -1,14 +1,15 @@
-package ru.practicum.event.dto;
+package ru.practicum.editing.dto;
 
-public enum EventLifeState {
-    PENDING("PENDING"),
-    PUBLISHED("PUBLISHED"),
-    NOTED("NOTED"),
-    CANCELED("CANCELED");
+public enum RevisionState {
+
+    INITIAL(""),
+    EDITED(""),
+    REPEATED(""),
+    RESOLVED("");
 
     private final String value;
 
-    EventLifeState(String value) {
+    RevisionState(String value) {
         this.value = value;
     }
 

@@ -2,6 +2,7 @@ package ru.practicum.event.dto;
 
 public enum StateAction {
     PUBLISH_EVENT("PUBLISH_EVENT"),
+    GET_NOTED("GET_NOTED"),
     REJECT_EVENT("REJECT_EVENT");
 
     private final String value;

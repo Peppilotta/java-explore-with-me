@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.storage.CategoryRepository;
+import ru.practicum.editing.dto.CorrectionAuthor;
+import ru.practicum.editing.dto.EventField;
+import ru.practicum.editing.service.CorrectionService;
 import ru.practicum.error.ApiError;
 import ru.practicum.error.ErrorStatus;
 import ru.practicum.event.dto.AdminEventsFindParameters;
@@ -17,6 +20,7 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.StateAction;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.UpdateEventRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.storage.EventRepository;
@@ -71,6 +75,8 @@ public class EventServicePrivateAdminImpl implements EventService {
 
     private final LocationMapper locationMapper;
 
+    private final CorrectionService correctionService;
+
     private final ApiError apiErrorConflict = new ApiError(ErrorStatus.E_409_CONFLICT.getValue(),
             "For the requested operation the conditions are not met.",
             "", LocalDateTime.now());
@@ -83,13 +89,41 @@ public class EventServicePrivateAdminImpl implements EventService {
             "Incorrectly made request.", "", LocalDateTime.now());
 
     @Override
-    public List<EventShortDto> getEvents(Long userId, Pageable pageable) {
+    public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
         log.info("Get events of user with id={}", userId);
         checkUserExistence(userId);
         return eventRepository.findAllByUserId(userId, pageable)
                 .stream()
                 .map(eventMapper::toShortDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
+        log.info("Request for list Events according parameters {}", parameters);
+        checkUsersInParameters(parameters.getUsers());
+        checkCategoriesInParameters(parameters.getCategories());
+        return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
+                .stream()
+                .map(eventMapper::toFullDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public EventFullDto getEventByUser(Long userId, Long eventId) {
+        log.info("Get request for events of user with id={}", userId);
+        checkUserExistence(userId);
+        checkEventExistence(eventId);
+        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        checkUserEvent(userId, event.getInitiator().getId());
+        return eventMapper.toFullDto(event);
+    }
+
+    @Override
+    public EventFullDto getEventByAdmin(Long eventId) {
+        log.info("Get request for  Event id = {}", eventId);
+        checkEventExistence(eventId);
+        return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
     }
 
     @Override
@@ -106,55 +140,59 @@ public class EventServicePrivateAdminImpl implements EventService {
         checkCategoryExistence(categoryId);
         Category category = categoryRepository.findById(categoryId).orElseGet(Category::new);
         event.setCreatedOn(LocalDateTime.now());
-
+        checkLocation(event.getLocation());
         return eventMapper.toFullDto(eventRepository.save(eventMapper.toEventFromNew(event,
                 saveTestedLocation(event.getLocation()),
                 category)));
     }
 
     @Override
-    public EventFullDto getEvent(Long userId, Long eventId) {
-        log.info("Get request for events of user with id={}", userId);
-        checkUserExistence(userId);
-        checkEventExistence(eventId);
-        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        checkUserEvent(userId, event.getInitiator().getId());
-        return eventMapper.toFullDto(event);
-    }
-
-    @Override
     @Transactional
-    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventUpdate) {
+    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updates) {
         log.info("Update request of user with id={} for event with id={} and updates = {}",
-                userId, eventId, eventUpdate);
+                userId, eventId, updates);
         checkUserExistence(userId);
         checkEventExistence(eventId);
         Event event = eventRepository.findById(eventId).orElseGet(Event::new);
         checkEventStatus(event.getState());
         checkUserEvent(userId, event.getInitiator().getId());
-        UserShortDto initiator = eventUpdate.getInitiator();
+
+        UserShortDto initiator = updates.getInitiator();
         if (!Objects.isNull(initiator)) {
             checkUserEvent(userId, initiator.getId());
             event.setInitiator(userMapper.fromShort(initiator));
         }
 
-        Long categoryId = eventUpdate.getCategory();
-        if (!Objects.isNull(categoryId)) {
-            checkCategoryExistence(categoryId);
-            event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
-        }
+        Event updatedCategoryDateLocation = updateCategoryDateLocation(event, updates);
 
-        LocalDateTime date = eventUpdate.getEventDate();
-        if (!Objects.isNull(date)) {
-            checkEventTime(date);
-            event.setEventDate(date);
-        }
-        LocationDto locationDto = eventUpdate.getLocation();
-        if (!Objects.isNull(locationDto)) {
-            event.setLocation(saveTestedLocation(locationDto));
-        }
+        Event saved = eventRepository.save(eventMapper.fromUpdatedByUser(updatedCategoryDateLocation, updates));
 
-        return eventMapper.toFullDto(eventRepository.save(eventMapper.fromUpdatedByUser(event, eventUpdate)));
+        if (Objects.equals(saved.getState(), EventLifeState.NOTED) && Objects.isNull(updates.getStateAction())) {
+            log.debug("     Send updates to corrections by user");
+            correctionService.saveCorrectionForEditedFields(eventId, getUpdatedFields(updates), CorrectionAuthor.USER);
+        }
+        return eventMapper.toFullDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updates) {
+        log.info("Update event with id={} by admin. Updates = {}", eventId, updates);
+        checkEventExistence(eventId);
+        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
+        checkStateForAdminUpdate(updates.getStateAction(), event.getState());
+
+        Event updatedCategoryDateLocation = updateCategoryDateLocation(event, updates);
+
+        Event saved = eventRepository.save(eventMapper.fromUpdatedByAdmin(updatedCategoryDateLocation, updates));
+
+        if (Objects.equals(event.getState(), EventLifeState.NOTED)) {
+            log.debug("     Send updates to corrections by Admin");
+
+            correctionService.saveCorrectionForEditedFields(eventId,
+                    getUpdatedFields(updates), CorrectionAuthor.ADMIN);
+        }
+        return eventMapper.toFullDto(saved);
     }
 
     @Override
@@ -227,59 +265,75 @@ public class EventServicePrivateAdminImpl implements EventService {
                 requestMapper.toDtos(changeStatusForRequests(rejectedIds, RequestStatus.REJECTED)));
     }
 
-    @Override
-    public List<EventFullDto> getEventsByAdmin(AdminEventsFindParameters parameters, Pageable pageable) {
-        log.info("Request for list Events according parameters {}", parameters);
-        checkUsersInParameters(parameters.getUsers());
-        checkCategoriesInParameters(parameters.getCategories());
-        return eventRepository.findAll(eventSpecification.getEventsByParameters(parameters), pageable)
-                .stream()
-                .map(eventMapper::toFullDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public EventFullDto getEventByAdmin(Long eventId) {
-        checkEventExistence(eventId);
-        return eventMapper.toFullDto(eventRepository.findById(eventId).orElseGet(Event::new));
-    }
-
-    @Override
-    @Transactional
-    public EventFullDto patchEventByAdmin(Long eventId, UpdateEventAdminRequest updatedEvent) {
-        log.info("Update event with id={} by admin. Updates = {}", eventId, updatedEvent);
-        checkEventExistence(eventId);
-        Event event = eventRepository.findById(eventId).orElseGet(Event::new);
-        EventLifeState initialState = event.getState();
-        checkStateForAdminUpdate(updatedEvent.getStateAction(), event.getState());
-        Long categoryId = updatedEvent.getCategory();
+    private Event updateCategoryDateLocation(Event event, UpdateEventRequest updates) {
+        Long categoryId = updates.getCategory();
         if (!Objects.isNull(categoryId)) {
             checkCategoryExistence(categoryId);
             event.setCategory(categoryRepository.findById(categoryId).orElseGet(Category::new));
         }
 
-        LocalDateTime eventDate = updatedEvent.getEventDate();
-        if (!Objects.isNull(eventDate)) {
-            checkEventTime(eventDate);
-            event.setEventDate(eventDate);
+        LocalDateTime date = updates.getEventDate();
+        if (!Objects.isNull(date)) {
+            checkEventTime(date);
+            event.setEventDate(date);
         }
-
-        LocationDto locationDto = updatedEvent.getLocation();
+        LocationDto locationDto = updates.getLocation();
         if (!Objects.isNull(locationDto)) {
             event.setLocation(saveTestedLocation(locationDto));
         }
-        Event eventForSave = eventMapper.fromUpdatedByAdmin(event, updatedEvent);
-        EventLifeState changedState = eventForSave.getState();
-        if (!Objects.equals(initialState, changedState) && Objects.equals(changedState, EventLifeState.PUBLISHED)) {
-            eventForSave.setPublishedOn(LocalDateTime.now());
+
+        return event;
+    }
+
+    private List<EventField> getUpdatedFields(UpdateEventRequest updatedEvent) {
+        List<EventField> eventFields = new ArrayList<>();
+
+        if (!Objects.isNull(updatedEvent.getCategory())) {
+            eventFields.add(EventField.CATEGORY);
         }
-        return eventMapper.toFullDto(eventRepository.save(eventForSave));
+
+        if (!Objects.isNull(updatedEvent.getEventDate())) {
+            eventFields.add(EventField.EVENT_DATE);
+        }
+
+        if (!Objects.isNull(updatedEvent.getLocation())) {
+            eventFields.add(EventField.LOCATION);
+        }
+
+        if (!Objects.isNull(updatedEvent.getAnnotation())) {
+            eventFields.add(EventField.ANNOTATION);
+        }
+
+        if (!Objects.isNull(updatedEvent.getDescription())) {
+            eventFields.add(EventField.DESCRIPTION);
+        }
+
+        if (!Objects.isNull(updatedEvent.getParticipantLimit())) {
+            eventFields.add(EventField.PARTICIPANT_LIMIT);
+        }
+
+        if (!Objects.isNull(updatedEvent.getPaid())) {
+            eventFields.add(EventField.PAID);
+        }
+
+        if (!Objects.isNull(updatedEvent.getRequestModeration())) {
+            eventFields.add(EventField.REQUEST_MODERATION);
+        }
+        return eventFields;
     }
 
     private List<Request> changeStatusForRequests(List<Long> requestIds, RequestStatus status) {
         List<Request> requests = requestRepository.findAllByIds(requestIds);
         requests.forEach(r -> r.setStatus(status));
         return requestRepository.saveAll(requests);
+    }
+
+    private void checkLocation(LocationDto locationDto) {
+        if (Objects.isNull(locationDto.getLat()) || Objects.isNull(locationDto.getLon())) {
+            apiErrorBadRequest.setMessage("Bad location field ");
+            apiErrorBadRequest.setTimestamp(LocalDateTime.now());
+            throw new BadRequestException(apiErrorBadRequest);
+        }
     }
 
     private void checkUpdates(List<Long> requestIds, RequestStatus newStatus) {

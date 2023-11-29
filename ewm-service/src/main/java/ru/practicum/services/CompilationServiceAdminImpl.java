@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.CompilationMapper;
+import ru.practicum.compilation.dto.CompilationWithoutEvent;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.NewEventCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationRequest;
@@ -59,18 +60,15 @@ public class CompilationServiceAdminImpl implements CompilationServiceAdmin {
 
     @Override
     @Transactional
-    public CompilationDto deleteCompilation(Long compId) {
+    public CompilationWithoutEvent deleteCompilation(Long compId) {
         log.info("Request for deleting Compilation with id = {}", compId);
         checkCompilationExists(compId);
+        Compilation found = compilationRepository.findById(compId).get();
+        CompilationWithoutEvent deleted = new CompilationWithoutEvent(found.getId(), found.getPinned(), found.getTitle());
         List<Long> eventIds = eventCompilationRepository.findByCompilationId(compId);
-        List<EventShortDto> events = eventRepository.findAllByIds(eventIds)
-                .stream()
-                .map(eventMapper::toShortDto)
-                .collect(Collectors.toList());
         eventCompilationRepository.deleteEvents(compId, eventIds);
         compilationRepository.deleteById(compId);
-        return compilationMapper.toCompilationDto(
-                compilationRepository.findById(compId).orElseGet(Compilation::new), events);
+        return deleted;
     }
 
     @Override

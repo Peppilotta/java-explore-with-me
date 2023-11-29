@@ -14,8 +14,6 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
- //   boolean existsById(@Nullable Long id);
-
     @Query("select new ru.practicum.category.dto.CategoryDto(c.id, c.name) from Category as c order by c.id")
     Page<CategoryDto> findAllPageable(Pageable pageable);
 

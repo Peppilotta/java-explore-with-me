@@ -1,14 +1,12 @@
-package ru.practicum.event.dto;
+package ru.practicum.editing.dto;
 
-public enum EventLifeState {
-    PENDING("PENDING"),
-    PUBLISHED("PUBLISHED"),
-    NOTED("NOTED"),
-    CANCELED("CANCELED");
-
+public enum CorrectionAuthor {
+    ADMIN("ADMIN"),
+    ADMIN_ONLY_NOTE("ADMIN_ONLY_NOTE"),
+    USER("USER");
     private final String value;
 
-    EventLifeState(String value) {
+    CorrectionAuthor(String value) {
         this.value = value;
     }
 

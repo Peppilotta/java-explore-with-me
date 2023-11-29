@@ -1,0 +1,91 @@
+{
+	"info": {
+		"_postman_id": "ff841249-ca19-4ed7-90fc-7fa0bde1409f",
+		"name": "Admin_Correction",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25227787"
+	},
+	"item": [
+		{
+			"name": "Find_3 states",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function(){pm.response.to.be.ok;\r",
+							"pm.response.to.be.withBody;\r",
+							"pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/admin/events?states=PENDING",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events"
+					],
+					"query": [
+						{
+							"key": "users",
+							"value": "4",
+							"disabled": true
+						},
+						{
+							"key": "users",
+							"value": "6",
+							"disabled": true
+						},
+						{
+							"key": "states",
+							"value": "PENDING"
+						},
+						{
+							"key": "categories",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "categories",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "rangeStart",
+							"value": "2024-01-01 00:00:00",
+							"disabled": true
+						},
+						{
+							"key": "rangeEnd",
+							"value": "2024-12-01 00:00:00",
+							"disabled": true
+						},
+						{
+							"key": "from",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "size",
+							"value": "5",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
